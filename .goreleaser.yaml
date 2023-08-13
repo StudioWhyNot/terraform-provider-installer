@@ -3,7 +3,7 @@
 before:
   hooks:
     # You may remove this if you don't use go modules.
-    - go mod tidy
+    - go1.19.12 mod tidy
     # - go generate ./...
 builds:
   - env:
@@ -12,21 +12,25 @@ builds:
     flags:
       - -trimpath
     ldflags:
-      - "-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}"
+    #  - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
+      - "-X main.version={{.Version}} -X main.commit={{.Commit}}"
+    gcflags:
+      - "all=-N -l"
     goos:
-      - darwin
-      - freebsd
+      # - darwin
+      # - freebsd
       - linux
-      - windows
+      #- windows
     goarch:
       - amd64
-      - "386"
-      - arm
-      - arm64
+      # - "386"
+      # - arm
+      # - arm64
     ignore:
       - goos: darwin
         goarch: "386"
     binary: "{{ .ProjectName }}_v{{ .Version }}"
+    gobinary: go1.19.12
 archives:
   - format: zip
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
