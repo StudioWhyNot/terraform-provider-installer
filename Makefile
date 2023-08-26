@@ -1,7 +1,7 @@
 .PHONY: test clean all
 
 NAME=installer
-OS_ARCH ?= linux_amd64
+OS_ARCH ?= linux_amd64_v1
 
 build:
 	goreleaser build --snapshot --clean
@@ -12,7 +12,7 @@ install: build
 	mv dist/terraform-provider-${NAME}_${OS_ARCH}/* /tmp/tfproviders/
 
 test:
-	go test $(TESTARGS) -race -parallel=4 ./...
+	go1.19.12 test $(TESTARGS) -race -parallel=4 ./...
 
 testacc:
-	TF_ACC=1 go test $(TESTARGS) -race -parallel=4 ./...
+	TF_ACC=1 go1.19.12 test $(TESTARGS) -race -parallel=4 ./...
