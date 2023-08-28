@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/shihanng/terraform-provider-installer/internal/apt"
-	"gotest.tools/v3/assert"
+	"gotest.tools/assert"
 )
 
 func TestGetInfo(t *testing.T) {

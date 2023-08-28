@@ -1,27 +1,32 @@
+# Visit https://golangci-lint.run/ for usage documentation
+# and information on other useful linters
+issues:
+  max-per-linter: 0
+  max-same-issues: 0
+
 run:
   build-tags:
     - apt
     - brew
-linters:
-  enable-all: true
-  disable:
-    - exhaustivestruct
-    - godox
-    # the following are deprecated
-    - golint
-    - interfacer
-    - maligned
-    - scopelint
 
-linters-settings:
-  wrapcheck:
-    ignoreSigs:
-      - .Errorf(
-      - errors.New(
-      - errors.Unwrap(
-      - .Wrap(
-      - .Wrapf(
-      - .WithMessage(
-      - .WithMessagef(
-      - .WithStack(
-      - errors.CombineErrors(
+linters:
+  disable-all: true
+  enable:
+    - durationcheck
+    - errcheck
+    - exportloopref
+    - forcetypeassert
+    - godot
+    - gofmt
+    - gosimple
+    - ineffassign
+    - makezero
+    - misspell
+    - nilerr
+    - predeclared
+    - staticcheck
+    - tenv
+    - unconvert
+    - unparam
+    - unused
+    - vet

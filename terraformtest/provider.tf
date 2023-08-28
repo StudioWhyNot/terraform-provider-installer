@@ -1,3 +1,3 @@
 provider "installer" {
-    api_token = "test_token"
+    endpoint = "test_endpoint"
 }

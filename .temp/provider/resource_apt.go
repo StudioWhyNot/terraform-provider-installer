@@ -2,6 +2,7 @@ package provider //nolint:dupl
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/cockroachdb/errors"
@@ -56,6 +57,7 @@ func resourceApt() *schema.Resource {
 
 func resourceAptCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	name := data.Get("name").(string) // nolint:forcetypeassert
+	fmt.Println("-------------- I AM A TEST! -------------")
 
 	if err := apt.Install(ctx, name); err != nil {
 		return xerrors.ToDiags(err)
@@ -65,6 +67,7 @@ func resourceAptCreate(ctx context.Context, data *schema.ResourceData, meta inte
 
 	resourceAptRead(ctx, data, meta)
 
+	fmt.Println("-------------- ENDING TEST! -------------")
 	return diag.Diagnostics{}
 }
 

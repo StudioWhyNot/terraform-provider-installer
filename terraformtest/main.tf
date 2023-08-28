@@ -2,6 +2,18 @@ resource "installer_apt" "neofetch" {
     name = "neofetch"
 }
 
+# resource "installer_apt" "example" {
+#   configurable_attribute = "some-value"
+
+#   connection {
+#       host = "hi"
+#       user = "root"
+#       private_key = "mom"
+#       agent = false
+#       timeout = "2m"
+#   }
+# }
+
 # resource "installer_script" "test" {
 #   path           = "/tmp/installer-myapp-test"
 #   install_script = <<-EOF
