@@ -3,7 +3,7 @@ package apt_test
 import (
 	"testing"
 
-	"github.com/shihanng/terraform-provider-installer/internal/apt"
+	"github.com/shihanng/terraform-provider-installer/internal/installers/apt"
 	"gotest.tools/assert"
 )
 

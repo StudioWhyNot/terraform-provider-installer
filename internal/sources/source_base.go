@@ -9,18 +9,18 @@ import (
 )
 
 type ISourceBase interface {
-	GetAptIDFromName(name string) string
+	GetIDFromName(name string) string
 }
-
-var _ ISourceBase = &SourceBase{}
 
 type SourceBase struct {
 	SourceType
 }
 
+var _ ISourceBase = &SourceBase{}
+
 const IDSeparator = ":"
 
-func (b *SourceBase) GetAptIDFromName(name string) string {
+func (b *SourceBase) GetIDFromName(name string) string {
 	return strings.Join([]string{b.SourceType.String(), name}, IDSeparator)
 }
 
@@ -30,30 +30,18 @@ func (b *SourceBase) GetSourceName(prefix string) string {
 	return strings.Join([]string{prefix, b.SourceType.String()}, NameSeparator)
 }
 
-func TryGetStateData[T any](ctx context.Context, state tfsdk.State, diagnostics diag.Diagnostics) (T, bool) {
-	var data T
-	diags := state.Get(ctx, &data)
-	diagnostics.Append(diags...)
-
-	if diagnostics.HasError() {
-		return data, false
-	}
-	return data, true
+type ITerraformDataProvider interface {
+	Get(ctx context.Context, target interface{}) diag.Diagnostics
 }
 
-func SetStateData(ctx context.Context, state tfsdk.State, diagnostics diag.Diagnostics, val interface{}) {
+func TryGetData[T any](ctx context.Context, provider ITerraformDataProvider, diagnostics *diag.Diagnostics) (T, bool) {
+	var data T
+	diags := provider.Get(ctx, &data)
+	diagnostics.Append(diags...)
+	return data, !diagnostics.HasError()
+}
+
+func SetStateData(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics, val interface{}) {
 	diags := state.Set(ctx, val)
 	diagnostics.Append(diags...)
-
-}
-
-func TryGetConfigData[T any](ctx context.Context, config tfsdk.Config, diagnostics diag.Diagnostics) (T, bool) {
-	var data T
-	diags := config.Get(ctx, &data)
-	diagnostics.Append(diags...)
-
-	if diagnostics.HasError() {
-		return data, false
-	}
-	return data, true
 }
