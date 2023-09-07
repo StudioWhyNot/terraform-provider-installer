@@ -13,7 +13,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/shihanng/terraform-provider-installer/internal/enums"
+	"github.com/shihanng/terraform-provider-installer/internal/installers"
 	"github.com/shihanng/terraform-provider-installer/internal/installers/apt"
+	"github.com/shihanng/terraform-provider-installer/internal/models"
 	"github.com/shihanng/terraform-provider-installer/internal/sources"
 	"github.com/shihanng/terraform-provider-installer/internal/xerrors"
 )
@@ -21,16 +24,18 @@ import (
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ datasource.DataSource = &DataSourceApt{}
 
-func NewDataSourceApt() datasource.DataSource {
-	source := DataSourceApt{}
-	source.SourceType = sources.SourceTypeApt
-	return &source
-}
-
 // DataSourceApt defines the data source implementation.
 type DataSourceApt struct {
 	sources.SourceBase
-	client *http.Client
+	client    *http.Client
+	installer installers.Installer
+}
+
+func NewDataSourceApt() datasource.DataSource {
+	source := DataSourceApt{}
+	source.InstallerType = enums.InstallerApt
+	source.installer = apt.NewAptInstaller()
+	return &source
 }
 
 // DataSourceAptModel describes the data source data model.
@@ -83,14 +88,19 @@ func (d *DataSourceApt) Read(ctx context.Context, req datasource.ReadRequest, re
 	}
 
 	var diags diag.Diagnostics
-
-	path, err := apt.FindInstalled(ctx, data.Name.ValueString())
+	options, err := models.GetOptions(data.Name.ValueString())
+	if err != nil {
+		diags = xerrors.ToDiags(err)
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	info, err := d.installer.FindInstalled(ctx, options)
 	if err != nil {
 		diags = xerrors.ToDiags(err)
 		resp.Diagnostics.Append(diags...)
 	}
 
-	data.Path = types.StringValue(path)
+	data.Path = types.StringValue(info.Path)
 
 	// Write logs using the tflog package
 	// Documentation: https://terraform.io/plugin/log

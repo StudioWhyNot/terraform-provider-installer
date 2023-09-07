@@ -17,7 +17,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/shihanng/terraform-provider-installer/internal/enums"
+	"github.com/shihanng/terraform-provider-installer/internal/installers"
 	"github.com/shihanng/terraform-provider-installer/internal/installers/apt"
+	"github.com/shihanng/terraform-provider-installer/internal/models"
 	"github.com/shihanng/terraform-provider-installer/internal/sources"
 	"github.com/shihanng/terraform-provider-installer/internal/xerrors"
 )
@@ -26,16 +29,11 @@ import (
 var _ resource.Resource = &ResourceApt{}
 var _ resource.ResourceWithImportState = &ResourceApt{}
 
-func NewResourceApt() resource.Resource {
-	source := ResourceApt{}
-	source.SourceType = sources.SourceTypeApt
-	return &source
-}
-
 // ResourceApt defines the resource implementation.
 type ResourceApt struct {
 	sources.SourceBase
-	client *http.Client
+	client    *http.Client
+	installer installers.Installer
 }
 
 // ResourceAptModel describes the resource data model.
@@ -43,6 +41,13 @@ type ResourceAptModel struct {
 	Id   types.String `tfsdk:"id"`
 	Name types.String `tfsdk:"name"`
 	Path types.String `tfsdk:"path"`
+}
+
+func NewResourceApt() resource.Resource {
+	source := ResourceApt{}
+	source.InstallerType = enums.InstallerApt
+	source.installer = apt.NewAptInstaller()
+	return &source
 }
 
 func (r *ResourceApt) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -106,13 +111,18 @@ func (r *ResourceApt) Create(ctx context.Context, req resource.CreateRequest, re
 	}
 
 	var diags diag.Diagnostics
-	name := data.Name.ValueString()
-	if err := apt.Install(ctx, name); err != nil {
+	options, err := models.GetOptions(data.Name.ValueString())
+	if err != nil {
+		diags = xerrors.ToDiags(err)
+		resp.Diagnostics.Append(diags...)
+		return
+	}
+	if err := r.installer.Install(ctx, options); err != nil {
 		diags = xerrors.ToDiags(err)
 		resp.Diagnostics.Append(diags...)
 	}
 
-	data.Id = types.StringValue(r.GetIDFromName(name))
+	data.Id = types.StringValue(r.GetIDFromName(options.Name))
 	if !r.UpdateFromInstallation(&data, ctx, &resp.Diagnostics) {
 		resp.State.RemoveResource(ctx)
 		return
@@ -120,7 +130,7 @@ func (r *ResourceApt) Create(ctx context.Context, req resource.CreateRequest, re
 
 	// Write logs using the tflog package
 	// Documentation: https://terraform.io/plugin/log
-	tflog.Trace(ctx, "Created an "+r.SourceType.String()+" resource")
+	tflog.Trace(ctx, "Created an "+r.InstallerType.String()+" resource")
 
 	sources.SetStateData(ctx, &resp.State, &resp.Diagnostics, &data)
 }
@@ -140,8 +150,13 @@ func (r *ResourceApt) Read(ctx context.Context, req resource.ReadRequest, resp *
 }
 
 func (r *ResourceApt) UpdateFromInstallation(data *ResourceAptModel, ctx context.Context, diagnostics *diag.Diagnostics) bool {
-	name := data.Name.ValueString()
-	path, err := apt.FindInstalled(ctx, name)
+	options, err := models.GetOptions(data.Name.ValueString())
+	if err != nil {
+		diags := xerrors.ToDiags(err)
+		diagnostics.Append(diags...)
+		return false
+	}
+	info, err := r.installer.FindInstalled(ctx, options)
 	if err != nil {
 		if errors.Is(err, xerrors.ErrNotInstalled) {
 			return false
@@ -150,8 +165,8 @@ func (r *ResourceApt) UpdateFromInstallation(data *ResourceAptModel, ctx context
 		diagnostics.Append(diags...)
 	}
 
-	data.Name = types.StringValue(name)
-	data.Path = types.StringValue(path)
+	data.Name = types.StringValue(options.Name)
+	data.Path = types.StringValue(info.Path)
 	return true
 }
 
@@ -182,8 +197,13 @@ func (r *ResourceApt) Delete(ctx context.Context, req resource.DeleteRequest, re
 		return
 	}
 
-	name := data.Name.ValueString()
-	if err := apt.Uninstall(ctx, name); err != nil {
+	options, err := models.GetOptions(data.Name.ValueString())
+	if err != nil {
+		diags := xerrors.ToDiags(err)
+		diags.Append(diags...)
+		return
+	}
+	if _, err := r.installer.Uninstall(ctx, options); err != nil {
 		diags = xerrors.ToDiags(err)
 		resp.Diagnostics.Append(diags...)
 	}

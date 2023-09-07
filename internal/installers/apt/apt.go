@@ -2,100 +2,55 @@ package apt
 
 import (
 	"context"
-	"os/exec"
-	"strings"
 
-	"github.com/cockroachdb/errors"
-	"github.com/shihanng/terraform-provider-installer/internal/system"
-	"github.com/shihanng/terraform-provider-installer/internal/xerrors"
+	"github.com/hashicorp/go-version"
+	"github.com/shihanng/terraform-provider-installer/internal/cliwrapper"
+	"github.com/shihanng/terraform-provider-installer/internal/enums"
+	"github.com/shihanng/terraform-provider-installer/internal/installers"
+	"github.com/shihanng/terraform-provider-installer/internal/models"
+	"github.com/shihanng/terraform-provider-installer/internal/versionfinders"
+	"github.com/shihanng/terraform-provider-installer/internal/versionfinders/factory"
 )
 
-func Install(ctx context.Context, name string) error {
-	cmd := exec.CommandContext(ctx, "sudo", "apt-get", "-y", "install", name)
+var _ installers.Installer = &AptInstaller{}
 
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return errors.Wrap(errors.WithDetail(err, string(out)), strings.Join(cmd.Args, " "))
-	}
-
-	return nil
+type AptInstaller struct {
+	CliWrapper    cliwrapper.CliWrapper
+	VersionFinder versionfinders.VersionFinder
 }
 
-func FindInstalled(ctx context.Context, name string) (string, error) {
-	info := GetInfo(name)
-
-	cmd := exec.CommandContext(ctx, "dpkg", "-L", info.Name) //nolint:gosec
-
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		if strings.Contains(string(out), "is not installed") {
-			return "", xerrors.ErrNotInstalled
-		}
-
-		return "", errors.Wrap(errors.WithDetail(err, string(out)), strings.Join(cmd.Args, " "))
+func NewAptInstaller() *AptInstaller {
+	const sudo = true
+	const program = "apt-get"
+	return &AptInstaller{
+		CliWrapper:    cliwrapper.NewLocalCliWrapper(sudo, program),
+		VersionFinder: factory.VersionFinderFactory(enums.VersionFinderDpkg),
 	}
-
-	if info.Version != "" {
-		cmd := exec.CommandContext(ctx, "dpkg", "-s", info.Name) //nolint:gosec
-
-		out, err := cmd.CombinedOutput()
-		if err != nil {
-			return "", errors.Wrap(errors.WithDetail(err, string(out)), strings.Join(cmd.Args, " "))
-		}
-
-		installedVersion := ExtractVersion(string(out))
-		if info.Version != installedVersion {
-			return "", xerrors.ErrNotInstalled
-		}
-	}
-
-	paths := strings.Split(string(out), "\n")
-
-	return system.FindExecutablePath(paths) // nolint:wrapcheck
 }
 
-func Uninstall(ctx context.Context, name string) error {
-	cmd := exec.CommandContext(ctx, "sudo", "apt-get", "-y", "remove", name)
-
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return errors.Wrap(errors.WithDetail(err, string(out)), strings.Join(cmd.Args, " "))
-	}
-
-	return nil
+func (i *AptInstaller) Install(ctx context.Context, options models.InstallerOptions) error {
+	out := i.AptInstall(ctx, options.Name, options.Version)
+	return out.Error
 }
 
-// Info contains the package name and the package version.
-type Info struct {
-	Name    string
-	Version string
+func (i *AptInstaller) FindInstalled(ctx context.Context, options models.InstallerOptions) (*models.InstalledProgramInfo, error) {
+	return i.VersionFinder.FindInstalled(ctx, options)
 }
 
-const nPart = 2
-
-// GetInfo splits the name and version from string name=version and put the
-// values into Info.
-func GetInfo(original string) Info {
-	var info Info
-
-	splitted := strings.SplitN(original, "=", nPart)
-
-	info.Name = splitted[0]
-
-	if len(splitted) == nPart {
-		info.Version = splitted[1]
+func (i *AptInstaller) Uninstall(ctx context.Context, options models.InstallerOptions) (bool, error) {
+	info, _ := i.FindInstalled(ctx, options)
+	if info == nil {
+		// Not installed
+		return false, nil
 	}
-
-	return info
+	out := i.AptRemove(ctx, options.Name, options.Version)
+	return out.Error == nil, out.Error
 }
 
-// ExtractVersion extracts version value from the output of dpkg -s <package>.
-func ExtractVersion(input string) string {
-	for _, line := range strings.Split(input, "\n") {
-		if strings.HasPrefix(line, "Version: ") {
-			return strings.TrimSpace(strings.TrimPrefix(line, "Version: "))
-		}
-	}
+func (i *AptInstaller) AptInstall(ctx context.Context, name string, version *version.Version) cliwrapper.CliOutput {
+	return i.CliWrapper.ExecuteCommand(ctx, "-y", "install", models.GetVersionedName(name, version))
+}
 
-	return ""
+func (i *AptInstaller) AptRemove(ctx context.Context, name string, version *version.Version) cliwrapper.CliOutput {
+	return i.CliWrapper.ExecuteCommand(ctx, "-y", "remove", models.GetVersionedName(name, version))
 }

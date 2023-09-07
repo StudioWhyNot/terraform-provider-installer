@@ -6,35 +6,36 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/shihanng/terraform-provider-installer/internal/enums"
 )
 
-type ISourceBase interface {
+type Source interface {
 	GetIDFromName(name string) string
 }
 
 type SourceBase struct {
-	SourceType
+	enums.InstallerType
 }
 
-var _ ISourceBase = &SourceBase{}
+var _ Source = &SourceBase{}
 
 const IDSeparator = ":"
 
 func (b *SourceBase) GetIDFromName(name string) string {
-	return strings.Join([]string{b.SourceType.String(), name}, IDSeparator)
+	return strings.Join([]string{b.InstallerType.String(), name}, IDSeparator)
 }
 
 const NameSeparator = "_"
 
 func (b *SourceBase) GetSourceName(prefix string) string {
-	return strings.Join([]string{prefix, b.SourceType.String()}, NameSeparator)
+	return strings.Join([]string{prefix, b.InstallerType.String()}, NameSeparator)
 }
 
-type ITerraformDataProvider interface {
+type TerraformDataProvider interface {
 	Get(ctx context.Context, target interface{}) diag.Diagnostics
 }
 
-func TryGetData[T any](ctx context.Context, provider ITerraformDataProvider, diagnostics *diag.Diagnostics) (T, bool) {
+func TryGetData[T any](ctx context.Context, provider TerraformDataProvider, diagnostics *diag.Diagnostics) (T, bool) {
 	var data T
 	diags := provider.Get(ctx, &data)
 	diagnostics.Append(diags...)

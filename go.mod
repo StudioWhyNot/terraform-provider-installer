@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/cockroachdb/errors v1.11.0
+	github.com/hashicorp/go-version v1.6.0
 	github.com/hashicorp/terraform-plugin-framework v1.3.4
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 )
@@ -13,7 +14,6 @@ require (
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/getsentry/sentry-go v0.18.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -42,5 +42,4 @@ require (
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
 	google.golang.org/grpc v1.56.1 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
-	gotest.tools v2.2.0+incompatible
 )
