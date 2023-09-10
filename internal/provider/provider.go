@@ -5,13 +5,10 @@ package provider
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
-	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/datasources"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/resources"
 )
@@ -27,43 +24,24 @@ type InstallerProvider struct {
 	version string
 }
 
+// The prefix name of the provider.
+const ProviderName = "installer"
+
 // InstallerProviderModel describes the provider data model.
 type InstallerProviderModel struct {
-	Endpoint types.String `tfsdk:"endpoint"`
 }
 
 func (p *InstallerProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "installer"
+	resp.TypeName = ProviderName
 	resp.Version = p.version
 }
 
 func (p *InstallerProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
-	resp.Schema = schema.Schema{
-		Attributes: map[string]schema.Attribute{
-			"endpoint": schema.StringAttribute{
-				MarkdownDescription: "Example provider attribute",
-				Optional:            true,
-			},
-		},
-	}
+	// No provider-level schema.
 }
 
 func (p *InstallerProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	var data InstallerProviderModel
-
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// Configuration values are now available.
-	// if data.Endpoint.IsNull() { /* ... */ }
-
-	// Example client configuration for data sources and resources
-	client := http.DefaultClient
-	resp.DataSourceData = client
-	resp.ResourceData = client
+	// No provider-level configuration.
 }
 
 func (p *InstallerProvider) Resources(ctx context.Context) []func() resource.Resource {

@@ -28,13 +28,14 @@ func NewDpkgVersionFinder() *DpkgVersionFinder {
 
 func (i *DpkgVersionFinder) FindInstalled(ctx context.Context, options models.InstallerOptions) (*models.InstalledProgramInfo, error) {
 	info := models.InstalledProgramInfo{}
-	programFound, out := i.DpkgContains(ctx, options.Name)
+	info.Name = options.Name
+	programFound, out := i.DpkgContains(ctx, info.Name)
 	if !programFound {
 		return nil, out.Error
 	}
 
 	if options.Version != nil {
-		statusOut := i.DpkgStatus(ctx, options.Name)
+		statusOut := i.DpkgStatus(ctx, info.Name)
 		if statusOut.Error != nil {
 			return nil, statusOut.Error
 		}

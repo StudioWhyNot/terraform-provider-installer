@@ -4,12 +4,21 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-version"
+	"github.com/shihanng/terraform-provider-installer/internal/enums"
+	"github.com/shihanng/terraform-provider-installer/internal/xerrors"
 )
 
-// Information about the isntalled program.
+// Information about the installed program.
 type InstalledProgramInfo struct {
-	Path    string
+	Name    string
 	Version version.Version
+	Path    string
+}
+
+// Information about the installed program, with the installer type.
+type TypedInstalledProgramInfo struct {
+	InstalledProgramInfo
+	InstallerType enums.InstallerType
 }
 
 // Information about the program to install.
@@ -28,7 +37,7 @@ const VersionSeperator = "="
 
 // GetOptions splits the name and version from string "name=version" and puts the
 // values into InstallerOptions.
-func GetOptions(nameVersionString string) (InstallerOptions, error) {
+func getOptions(nameVersionString string) (InstallerOptions, error) {
 	const expectedParts = 2
 
 	var info InstallerOptions
@@ -46,6 +55,20 @@ func GetOptions(nameVersionString string) (InstallerOptions, error) {
 	}
 
 	return info, nil
+}
+
+// GetOptions splits the name and version from string "name=version" and puts the
+// values into InstallerOptions. If a version is provided, it will use that version.
+func GetOptions(nameVersionString string, version *version.Version) (InstallerOptions, error) {
+	opt, err := getOptions(nameVersionString)
+	if err != nil {
+		return opt, err
+	}
+	if (opt.Version != nil) && (version != nil) {
+		return opt, xerrors.ErrDoubleVersions
+	}
+	opt.Version = version
+	return opt, nil
 }
 
 func GetVersionedName(program string, version *version.Version) string {

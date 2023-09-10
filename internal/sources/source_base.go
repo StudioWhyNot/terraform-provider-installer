@@ -2,47 +2,45 @@ package sources
 
 import (
 	"context"
-	"strings"
 
+	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/shihanng/terraform-provider-installer/internal/enums"
+	"github.com/shihanng/terraform-provider-installer/internal/installers"
+	"github.com/shihanng/terraform-provider-installer/internal/installers/factory"
+	"github.com/shihanng/terraform-provider-installer/internal/models"
 )
 
-type Source interface {
-	GetIDFromName(name string) string
+type SourceData interface {
+	GetName() types.String
+	GetVersion() *version.Version
+	SetDataFromTypedInstalledProgramInfo(info *models.TypedInstalledProgramInfo)
 }
 
 type SourceBase struct {
-	enums.InstallerType
+	Installer installers.Installer
 }
 
-var _ Source = &SourceBase{}
-
-const IDSeparator = ":"
-
-func (b *SourceBase) GetIDFromName(name string) string {
-	return strings.Join([]string{b.InstallerType.String(), name}, IDSeparator)
+func NewSourceBase(installerType enums.InstallerType) *SourceBase {
+	return &SourceBase{
+		Installer: factory.InstallerFinderFactory(installerType),
+	}
 }
 
-const NameSeparator = "_"
+func (s *SourceBase) GetDefaultTypeName(providerTypeName string) string {
+	return s.Installer.GetInstallerType().GetSourceName(providerTypeName)
+}
 
-func (b *SourceBase) GetSourceName(prefix string) string {
-	return strings.Join([]string{prefix, b.InstallerType.String()}, NameSeparator)
+func (s *SourceBase) UpdateFromInstallation(data SourceData, ctx context.Context, diagnostics *diag.Diagnostics) bool {
+	info := GetInstallationInfo(data, s.Installer, ctx, diagnostics)
+	success := info != nil
+	if success {
+		data.SetDataFromTypedInstalledProgramInfo(info)
+	}
+	return success
 }
 
 type TerraformDataProvider interface {
 	Get(ctx context.Context, target interface{}) diag.Diagnostics
-}
-
-func TryGetData[T any](ctx context.Context, provider TerraformDataProvider, diagnostics *diag.Diagnostics) (T, bool) {
-	var data T
-	diags := provider.Get(ctx, &data)
-	diagnostics.Append(diags...)
-	return data, !diagnostics.HasError()
-}
-
-func SetStateData(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics, val interface{}) {
-	diags := state.Set(ctx, val)
-	diagnostics.Append(diags...)
 }

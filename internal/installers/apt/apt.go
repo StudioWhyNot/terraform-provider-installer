@@ -28,19 +28,23 @@ func NewAptInstaller() *AptInstaller {
 	}
 }
 
+func (i *AptInstaller) GetInstallerType() enums.InstallerType {
+	return enums.InstallerApt
+}
+
 func (i *AptInstaller) Install(ctx context.Context, options models.InstallerOptions) error {
 	out := i.AptInstall(ctx, options.Name, options.Version)
 	return out.Error
 }
 
-func (i *AptInstaller) FindInstalled(ctx context.Context, options models.InstallerOptions) (*models.InstalledProgramInfo, error) {
-	return i.VersionFinder.FindInstalled(ctx, options)
+func (i *AptInstaller) FindInstalled(ctx context.Context, options models.InstallerOptions) (*models.TypedInstalledProgramInfo, error) {
+	return installers.GetInfoFromVersionFinder(i.GetInstallerType(), i.VersionFinder, options, ctx)
 }
 
 func (i *AptInstaller) Uninstall(ctx context.Context, options models.InstallerOptions) (bool, error) {
 	info, _ := i.FindInstalled(ctx, options)
 	if info == nil {
-		// Not installed
+		// Not installed, no error.
 		return false, nil
 	}
 	out := i.AptRemove(ctx, options.Name, options.Version)

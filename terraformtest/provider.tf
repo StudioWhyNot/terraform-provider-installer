@@ -1,3 +1,3 @@
 provider "installer" {
-    endpoint = "test_endpoint"
+    //endpoint = "test_endpoint"
 }
