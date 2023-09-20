@@ -8,17 +8,58 @@ import (
 	"github.com/shihanng/terraform-provider-installer/internal/xerrors"
 )
 
+// Name and version of a program.
+type NamedVersion struct {
+	Name    string
+	Version *version.Version
+}
+
+func NewNamedVersion(name string, version *version.Version) NamedVersion {
+	return NamedVersion{
+		Name:    name,
+		Version: version,
+	}
+}
+
+func (n NamedVersion) String() string {
+	return GetVersionedName(n.Name, n.Version)
+}
+
+func (n NamedVersion) Equals(other NamedVersion) bool {
+	return n.Name == other.Name && n.Version.Equal(other.Version)
+}
+
 // Information about the installed program.
 type InstalledProgramInfo struct {
-	Name    string
-	Version version.Version
-	Path    string
+	NamedVersion
+	Path string
+}
+
+func NewInstalledProgramInfo(name string, version *version.Version, path string) InstalledProgramInfo {
+	return InstalledProgramInfo{
+		NamedVersion: NewNamedVersion(name, version),
+		Path:         path,
+	}
+}
+
+func (i *InstalledProgramInfo) IsNamedVersion(other NamedVersion) bool {
+	if i == nil {
+		return false
+	}
+	return i.NamedVersion.Equals(other)
 }
 
 // Information about the installed program, with the installer type.
 type TypedInstalledProgramInfo struct {
 	InstalledProgramInfo
 	InstallerType enums.InstallerType
+}
+
+func NewTypedInstalledProgramInfo(installerType enums.InstallerType, name string, version *version.Version, path string) TypedInstalledProgramInfo {
+	return TypedInstalledProgramInfo{
+		InstalledProgramInfo: NewInstalledProgramInfo(name, version, path),
+		InstallerType:        installerType,
+	}
 }
 
 // Information about the program to install.
@@ -57,9 +98,9 @@ func getOptions(nameVersionString string) (InstallerOptions, error) {
 	return info, nil
 }
 
-// GetOptions splits the name and version from string "name=version" and puts the
+// NewInstallerOptions splits the name and version from string "name=version" and puts the
 // values into InstallerOptions. If a version is provided, it will use that version.
-func GetOptions(nameVersionString string, version *version.Version) (InstallerOptions, error) {
+func NewInstallerOptions(nameVersionString string, version *version.Version) (InstallerOptions, error) {
 	opt, err := getOptions(nameVersionString)
 	if err != nil {
 		return opt, err
@@ -71,9 +112,21 @@ func GetOptions(nameVersionString string, version *version.Version) (InstallerOp
 	return opt, nil
 }
 
+func (o *InstallerOptions) GetVersionedName() string {
+	return GetVersionedName(o.Name, o.Version)
+}
+
+// GetVersionedName returns the name and version as a combined string.
 func GetVersionedName(program string, version *version.Version) string {
 	if version == nil {
 		return program
 	}
 	return program + VersionSeperator + version.String()
+}
+
+func GetCombinedNameVersionStrings(name string, version string) string {
+	if version == "" {
+		return name
+	}
+	return name + VersionSeperator + version
 }

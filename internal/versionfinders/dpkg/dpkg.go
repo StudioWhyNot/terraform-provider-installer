@@ -44,7 +44,7 @@ func (i *DpkgVersionFinder) FindInstalled(ctx context.Context, options models.In
 		if options.Version != installedVersion {
 			return nil, err
 		}
-		info.Version = *installedVersion
+		info.Version = installedVersion
 	}
 
 	paths := strings.Split(out.CombinedOutput, versionfinders.OutputNewline)

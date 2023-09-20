@@ -6,7 +6,7 @@ import (
 	"github.com/shihanng/terraform-provider-installer/internal/installers/apt"
 )
 
-func InstallerFinderFactory(installerType enums.InstallerType) installers.Installer {
+func InstallerFactory(installerType enums.InstallerType) installers.Installer {
 	switch installerType {
 	default:
 		fallthrough

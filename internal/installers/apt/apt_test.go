@@ -1,62 +1,42 @@
 package apt_test
 
-// import (
-// 	"testing"
+import (
+	"context"
+	"testing"
+	"time"
 
-// 	"github.com/hashicorp/go-version"
-// 	"github.com/shihanng/terraform-provider-installer/internal/installers/apt"
-// 	"github.com/shihanng/terraform-provider-installer/internal/models"
-// 	"gotest.tools/assert"
-// )
+	"github.com/shihanng/terraform-provider-installer/internal/enums"
+	"github.com/shihanng/terraform-provider-installer/internal/installers/factory"
+	"github.com/shihanng/terraform-provider-installer/internal/models/testingmodels"
+	"gotest.tools/v3/assert"
+)
 
-// func TestGetInfo(t *testing.T) {
-// 	t.Parallel()
+func TestInstall(t *testing.T) {
+	tests := []testingmodels.TestInfo{
+		//testingmodels.NewTestInfo("", ""),
+		testingmodels.NewTestInfo("nginx", ""),
+		testingmodels.NewTestInfo("nginx", "1.18.0-6ubuntu14.3"),
+		//testingmodels.NewTestInfo("nginx", "1.18.0-6ubuntu14.3=abc"),
+	}
 
-// 	tests := []struct {
-// 		input    string
-// 		expected models.InstallerOptions
-// 	}{
-// 		{
-// 			input: "",
-// 			expected: models.InstallerOptions{
-// 				Name:    "",
-// 				Version: nil,
-// 			},
-// 		},
-// 		{
-// 			input: "nginx",
-// 			expected: models.InstallerOptions{
-// 				Name:    "nginx",
-// 				Version: nil,
-// 			},
-// 		},
-// 		{
-// 			input: "nginx=1.18.0-6ubuntu14.3",
-// 			expected: models.InstallerOptions{
-// 				Name:    "nginx",
-// 				Version: version.NewVersion("1.18.0-6ubuntu14.3"),
-// 			},
-// 		},
-// 		{
-// 			input: "nginx=1.18.0-6ubuntu14.3=abc",
-// 			expected: models.InstallerOptions{
-// 				Name:    "nginx",
-// 				Version: "1.18.0-6ubuntu14.3=abc",
-// 			},
-// 		},
-// 	}
+	for _, tc := range tests {
+		tc := tc
 
-// 	for _, tc := range tests {
-// 		tc := tc
+		t.Run(tc.String(), func(t *testing.T) {
+			installer := factory.InstallerFactory(enums.InstallerApt)
+			context, cancel := CreateTestContext()
+			err := installer.Install(context, tc.Input)
+			assert.NilError(t, err)
+			defer cancel()
+		})
+	}
+}
 
-// 		t.Run(tc.input, func(t *testing.T) {
-// 			t.Parallel()
-
-// 			actual := apt.GetInfo(tc.input)
-// 			assert.DeepEqual(t, actual, tc.expected)
-// 		})
-// 	}
-// }
+func CreateTestContext() (context.Context, context.CancelFunc) {
+	const testTimeout = time.Minute * 1
+	ctx := context.Background()
+	return context.WithTimeout(ctx, testTimeout)
+}
 
 // func TestExtractVersion(t *testing.T) {
 // 	t.Parallel()

@@ -25,7 +25,7 @@ func SetStateData(ctx context.Context, state *tfsdk.State, diagnostics *diag.Dia
 }
 
 func getLoggedOptions(data SourceData, diagnostics *diag.Diagnostics) *models.InstallerOptions {
-	options, err := models.GetOptions(data.GetName().ValueString(), nil)
+	options, err := models.NewInstallerOptions(data.GetName().ValueString(), nil)
 	if err != nil {
 		xerrors.AppendToDiagnostics(diagnostics, err)
 		return nil
@@ -34,7 +34,7 @@ func getLoggedOptions(data SourceData, diagnostics *diag.Diagnostics) *models.In
 }
 
 func getInstallationInfo(fullName string, version *version.Version, installer installers.Installer, ctx context.Context) (*models.TypedInstalledProgramInfo, error) {
-	options, err := models.GetOptions(fullName, version)
+	options, err := models.NewInstallerOptions(fullName, version)
 	if err != nil {
 		return nil, err
 	}

@@ -24,7 +24,7 @@ type SourceBase struct {
 
 func NewSourceBase(installerType enums.InstallerType) *SourceBase {
 	return &SourceBase{
-		Installer: factory.InstallerFinderFactory(installerType),
+		Installer: factory.InstallerFactory(installerType),
 	}
 }
 
