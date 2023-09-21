@@ -21,7 +21,7 @@ func NewResource[T sources.SourceData](installer installers.Installer[T]) *Resou
 }
 
 func (d *Resource[T]) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = d.Installer.GetInstallerType().GetIDFromName(req.ProviderTypeName)
+	resp.TypeName = d.Installer.GetInstallerType().GetSourceName(req.ProviderTypeName)
 }
 
 func (r *Resource[T]) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

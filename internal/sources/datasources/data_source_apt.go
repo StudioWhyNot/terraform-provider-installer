@@ -24,7 +24,7 @@ var _ sources.SourceData = &DataSourceAptModel{}
 // DataSourceAptModel describes the data source data model.
 type DataSourceAptModel struct {
 	Name    types.String `tfsdk:"name"`
-	Version types.String `tfsdk:"name"`
+	Version types.String `tfsdk:"version"`
 	Path    types.String `tfsdk:"path"`
 }
 
@@ -42,6 +42,14 @@ func (m *DataSourceAptModel) GetVersion() *version.Version {
 
 func (m *DataSourceAptModel) Initialize() bool {
 	return !m.Name.IsNull()
+}
+
+func (m *DataSourceAptModel) CopyFromTypedInstalledProgramInfo(installedInfo *models.TypedInstalledProgramInfo) {
+	m.Name = types.StringValue(installedInfo.Name)
+	m.Path = types.StringValue(installedInfo.Path)
+	if installedInfo.Version != nil {
+		m.Version = types.StringValue(installedInfo.Version.String())
+	}
 }
 
 // DataSourceApt defines the data source implementation.

@@ -27,7 +27,7 @@ var _ sources.SourceData = &ResourceAptModel{}
 type ResourceAptModel struct {
 	Id      types.String `tfsdk:"id"`
 	Name    types.String `tfsdk:"name"`
-	Version types.String `tfsdk:"name"`
+	Version types.String `tfsdk:"version"`
 	Path    types.String `tfsdk:"path"`
 }
 
@@ -44,8 +44,16 @@ func (m *ResourceAptModel) GetVersion() *version.Version {
 }
 
 func (m *ResourceAptModel) Initialize() bool {
-	m.Id = sources.GetIDFromName(m.Name, enums.InstallerApt)
+	m.Id = sources.GetIDFromNameAndVersion(m.Name, m.Version, enums.InstallerApt)
 	return !m.Name.IsNull()
+}
+
+func (m *ResourceAptModel) CopyFromTypedInstalledProgramInfo(installedInfo *models.TypedInstalledProgramInfo) {
+	m.Name = types.StringValue(installedInfo.Name)
+	m.Path = types.StringValue(installedInfo.Path)
+	if installedInfo.Version != nil {
+		m.Version = types.StringValue(installedInfo.Version.String())
+	}
 }
 
 // ResourceApt defines the resource implementation.

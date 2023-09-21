@@ -7,10 +7,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/shihanng/terraform-provider-installer/internal/enums"
 	"github.com/shihanng/terraform-provider-installer/internal/installers"
+	"github.com/shihanng/terraform-provider-installer/internal/models"
 )
 
 type SourceData interface {
 	Initialize() bool
+	CopyFromTypedInstalledProgramInfo(programInfo *models.TypedInstalledProgramInfo)
 }
 
 type SourceBase[T any] struct {
@@ -25,6 +27,10 @@ func NewSourceBase[T any](installer installers.Installer[T]) *SourceBase[T] {
 
 func GetIDFromName(name types.String, installerType enums.InstallerType) types.String {
 	return types.StringValue(installerType.GetIDFromName(name.ValueString()))
+}
+
+func GetIDFromNameAndVersion(name types.String, version types.String, installerType enums.InstallerType) types.String {
+	return types.StringValue(models.GetIDFromNameAndVersion(name.ValueString(), version.ValueString(), installerType))
 }
 
 type TerraformDataProvider interface {

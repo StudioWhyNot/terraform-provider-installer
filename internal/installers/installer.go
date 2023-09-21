@@ -24,8 +24,6 @@ func GetInfoFromVersionFinder(installerType enums.InstallerType, versionFinder v
 	if info == nil {
 		return nil, err
 	}
-	return &models.TypedInstalledProgramInfo{
-		InstalledProgramInfo: *info,
-		InstallerType:        installerType,
-	}, err
+	newInfo := models.NewTypedInstalledProgramInfoFromInfo(installerType, *info)
+	return &newInfo, err
 }

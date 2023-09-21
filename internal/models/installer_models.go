@@ -69,8 +69,12 @@ type TypedInstalledProgramInfo struct {
 }
 
 func NewTypedInstalledProgramInfo(installerType enums.InstallerType, name string, version *version.Version, path string) TypedInstalledProgramInfo {
+	return NewTypedInstalledProgramInfoFromInfo(installerType, NewInstalledProgramInfo(name, version, path))
+}
+
+func NewTypedInstalledProgramInfoFromInfo(installerType enums.InstallerType, info InstalledProgramInfo) TypedInstalledProgramInfo {
 	return TypedInstalledProgramInfo{
-		InstalledProgramInfo: NewInstalledProgramInfo(name, version, path),
+		InstalledProgramInfo: info,
 		InstallerType:        installerType,
 	}
 }
@@ -146,4 +150,11 @@ func GetCombinedNameVersionStrings(name string, version string) string {
 		return name
 	}
 	return name + VersionSeperator + version
+}
+
+func GetIDFromNameAndVersion(name string, version string, installerType enums.InstallerType) string {
+	if version != "" {
+		name = GetCombinedNameVersionStrings(name, version)
+	}
+	return installerType.GetIDFromName(name)
 }
