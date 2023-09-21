@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/shihanng/terraform-provider-installer/internal/enums"
+	"github.com/shihanng/terraform-provider-installer/internal/installers/apt"
 	"github.com/shihanng/terraform-provider-installer/internal/models"
 	"github.com/shihanng/terraform-provider-installer/internal/sources"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/datasources/defaults"
@@ -23,21 +23,25 @@ var _ sources.SourceData = &DataSourceAptModel{}
 
 // DataSourceAptModel describes the data source data model.
 type DataSourceAptModel struct {
-	Name types.String `tfsdk:"name"`
-	Path types.String `tfsdk:"path"`
+	Name    types.String `tfsdk:"name"`
+	Version types.String `tfsdk:"name"`
+	Path    types.String `tfsdk:"path"`
 }
 
-func (m *DataSourceAptModel) GetName() types.String {
-	return m.Name
+func (m *DataSourceAptModel) GetNamedVersion() models.NamedVersion {
+	return models.NewNamedVersionFromStrings(m.Name.ValueString(), m.Version.ValueString())
+}
+
+func (m *DataSourceAptModel) GetName() string {
+	return m.GetNamedVersion().Name
 }
 
 func (m *DataSourceAptModel) GetVersion() *version.Version {
-	return nil
+	return m.GetNamedVersion().Version
 }
 
-func (m *DataSourceAptModel) SetDataFromTypedInstalledProgramInfo(info *models.TypedInstalledProgramInfo) {
-	m.Name = types.StringValue(info.Name)
-	m.Path = types.StringValue(info.Path)
+func (m *DataSourceAptModel) Initialize() bool {
+	return !m.Name.IsNull()
 }
 
 // DataSourceApt defines the data source implementation.
@@ -47,15 +51,16 @@ type DataSourceApt struct {
 
 func NewDataSourceApt() datasource.DataSource {
 	return &DataSourceApt{
-		DataSource: NewDataSource[*DataSourceAptModel](enums.InstallerApt),
+		DataSource: NewDataSource[*DataSourceAptModel](apt.NewAptInstaller[*DataSourceAptModel]()),
 	}
 }
 
 func (d *DataSourceApt) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"name": defaults.GetNameSchema(schemastrings.AptNameDescription),
-			"path": defaults.GetPathSchema(schemastrings.AptPathDescription),
+			"name":    defaults.GetNameSchema(schemastrings.AptNameDescription),
+			"version": defaults.GetVersionSchema(schemastrings.AptVersionDescription),
+			"path":    defaults.GetPathSchema(schemastrings.AptPathDescription),
 		},
 	}
 }

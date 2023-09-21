@@ -17,3 +17,10 @@ func GetPathSchema(markdownDescription string) schema.Attribute {
 		Computed:            true,
 	}
 }
+
+func GetVersionSchema(markdownDescription string) schema.Attribute {
+	return schema.StringAttribute{
+		MarkdownDescription: markdownDescription,
+		Optional:            true,
+	}
+}

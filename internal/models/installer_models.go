@@ -21,6 +21,19 @@ func NewNamedVersion(name string, version *version.Version) NamedVersion {
 	}
 }
 
+func NewNamedVersionFromString(name string) NamedVersion {
+	name, version, _ := GetNameAndVersion(name)
+	return NewNamedVersion(name, version)
+}
+
+func NewNamedVersionFromStrings(name string, ver string) NamedVersion {
+	if ver == "" {
+		return NewNamedVersionFromString(name)
+	}
+	newVer, _ := version.NewVersion(ver)
+	return NewNamedVersion(name, newVer)
+}
+
 func (n NamedVersion) String() string {
 	return GetVersionedName(n.Name, n.Version)
 }
@@ -76,26 +89,30 @@ func (o InstallerOptions) HasVersion() bool {
 // The separator between name and version.
 const VersionSeperator = "="
 
+func GetNameAndVersion(nameVersionString string) (string, *version.Version, error) {
+	const expectedParts = 2
+	var name string
+	var ver *version.Version
+	var err error
+
+	split := strings.SplitN(nameVersionString, VersionSeperator, expectedParts)
+	name = split[0]
+
+	if len(split) == expectedParts {
+		ver, err = version.NewVersion(split[1])
+	}
+
+	return name, ver, err
+}
+
 // GetOptions splits the name and version from string "name=version" and puts the
 // values into InstallerOptions.
 func getOptions(nameVersionString string) (InstallerOptions, error) {
-	const expectedParts = 2
-
 	var info InstallerOptions
+	var err error
+	info.Name, info.Version, err = GetNameAndVersion(nameVersionString)
 
-	split := strings.SplitN(nameVersionString, VersionSeperator, expectedParts)
-
-	info.Name = split[0]
-
-	if len(split) == expectedParts {
-		version, error := version.NewVersion(split[1])
-		if error != nil {
-			return info, error
-		}
-		info.Version = version
-	}
-
-	return info, nil
+	return info, err
 }
 
 // NewInstallerOptions splits the name and version from string "name=version" and puts the

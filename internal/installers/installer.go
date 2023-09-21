@@ -8,15 +8,18 @@ import (
 	"github.com/shihanng/terraform-provider-installer/internal/versionfinders"
 )
 
-// The basic interface for all installers.
-type Installer interface {
-	GetInstallerType() enums.InstallerType
-	Install(ctx context.Context, options models.InstallerOptions) error
-	FindInstalled(ctx context.Context, options models.InstallerOptions) (*models.TypedInstalledProgramInfo, error)
-	Uninstall(ctx context.Context, options models.InstallerOptions) (bool, error)
+type InstallerOptions interface {
 }
 
-func GetInfoFromVersionFinder(installerType enums.InstallerType, versionFinder versionfinders.VersionFinder, options models.InstallerOptions, ctx context.Context) (*models.TypedInstalledProgramInfo, error) {
+// The basic interface for all installers.
+type Installer[T any] interface {
+	GetInstallerType() enums.InstallerType
+	Install(ctx context.Context, options T) error
+	FindInstalled(ctx context.Context, options T) (*models.TypedInstalledProgramInfo, error)
+	Uninstall(ctx context.Context, options T) (bool, error)
+}
+
+func GetInfoFromVersionFinder(installerType enums.InstallerType, versionFinder versionfinders.VersionFinder, options versionfinders.VersionFinderOptions, ctx context.Context) (*models.TypedInstalledProgramInfo, error) {
 	info, err := versionFinder.FindInstalled(ctx, options)
 	if info == nil {
 		return nil, err

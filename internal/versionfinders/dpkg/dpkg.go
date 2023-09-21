@@ -26,22 +26,22 @@ func NewDpkgVersionFinder() *DpkgVersionFinder {
 	}
 }
 
-func (i *DpkgVersionFinder) FindInstalled(ctx context.Context, options models.InstallerOptions) (*models.InstalledProgramInfo, error) {
+func (i *DpkgVersionFinder) FindInstalled(ctx context.Context, options versionfinders.VersionFinderOptions) (*models.InstalledProgramInfo, error) {
 	info := models.InstalledProgramInfo{}
-	info.Name = options.Name
+	info.Name = options.GetName()
 	programFound, out := i.DpkgContains(ctx, info.Name)
 	if !programFound {
 		return nil, out.Error
 	}
-
-	if options.Version != nil {
+	version := options.GetVersion()
+	if version != nil {
 		statusOut := i.DpkgStatus(ctx, info.Name)
 		if statusOut.Error != nil {
 			return nil, statusOut.Error
 		}
 
 		installedVersion, err := versionfinders.ExtractVersion(statusOut.CombinedOutput)
-		if options.Version != installedVersion {
+		if version != installedVersion {
 			return nil, err
 		}
 		info.Version = installedVersion

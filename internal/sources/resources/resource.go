@@ -3,26 +3,25 @@ package resources
 import (
 	"context"
 
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/shihanng/terraform-provider-installer/internal/enums"
+	"github.com/shihanng/terraform-provider-installer/internal/installers"
 	"github.com/shihanng/terraform-provider-installer/internal/sources"
 )
 
 // Resource[T] defines the generic data source implementation.
 type Resource[T sources.SourceData] struct {
-	sources.SourceBase
+	sources.SourceBase[T]
 }
 
-func NewResource[T sources.SourceData](installerType enums.InstallerType) *Resource[T] {
+func NewResource[T sources.SourceData](installer installers.Installer[T]) *Resource[T] {
 	return &Resource[T]{
-		SourceBase: *sources.NewSourceBase(installerType),
+		SourceBase: *sources.NewSourceBase[T](installer),
 	}
 }
 
-func (d *Resource[T]) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = d.GetDefaultTypeName(req.ProviderTypeName)
+func (d *Resource[T]) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = d.Installer.GetInstallerType().GetIDFromName(req.ProviderTypeName)
 }
 
 func (r *Resource[T]) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

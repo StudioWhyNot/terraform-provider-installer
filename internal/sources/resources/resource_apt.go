@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/shihanng/terraform-provider-installer/internal/enums"
+	"github.com/shihanng/terraform-provider-installer/internal/installers/apt"
 	"github.com/shihanng/terraform-provider-installer/internal/models"
 	"github.com/shihanng/terraform-provider-installer/internal/sources"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/resources/defaults"
@@ -24,23 +25,27 @@ var _ sources.SourceData = &ResourceAptModel{}
 
 // ResourceAptModel describes the resource data model.
 type ResourceAptModel struct {
-	Id   types.String `tfsdk:"id"`
-	Name types.String `tfsdk:"name"`
-	Path types.String `tfsdk:"path"`
+	Id      types.String `tfsdk:"id"`
+	Name    types.String `tfsdk:"name"`
+	Version types.String `tfsdk:"name"`
+	Path    types.String `tfsdk:"path"`
 }
 
-func (m *ResourceAptModel) GetName() types.String {
-	return m.Name
+func (m *ResourceAptModel) GetNamedVersion() models.NamedVersion {
+	return models.NewNamedVersionFromStrings(m.Name.ValueString(), m.Version.ValueString())
+}
+
+func (m *ResourceAptModel) GetName() string {
+	return m.GetNamedVersion().Name
 }
 
 func (m *ResourceAptModel) GetVersion() *version.Version {
-	return nil
+	return m.GetNamedVersion().Version
 }
 
-func (m *ResourceAptModel) SetDataFromTypedInstalledProgramInfo(info *models.TypedInstalledProgramInfo) {
-	m.Id = types.StringValue(info.InstallerType.GetIDFromName(info.Name))
-	m.Name = types.StringValue(info.Name)
-	m.Path = types.StringValue(info.Path)
+func (m *ResourceAptModel) Initialize() bool {
+	m.Id = sources.GetIDFromName(m.Name, enums.InstallerApt)
+	return !m.Name.IsNull()
 }
 
 // ResourceApt defines the resource implementation.
@@ -50,12 +55,8 @@ type ResourceApt struct {
 
 func NewResourceApt() resource.Resource {
 	return &ResourceApt{
-		Resource: NewResource[*ResourceAptModel](enums.InstallerApt),
+		Resource: NewResource[*ResourceAptModel](apt.NewAptInstaller[*ResourceAptModel]()),
 	}
-}
-
-func (r *ResourceApt) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = r.GetDefaultTypeName(req.ProviderTypeName)
 }
 
 func (r *ResourceApt) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -63,9 +64,10 @@ func (r *ResourceApt) Schema(ctx context.Context, req resource.SchemaRequest, re
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: schemastrings.AptSourceDescription,
 		Attributes: map[string]schema.Attribute{
-			"id":   defaults.GetIdSchema(),
-			"name": defaults.GetNameSchema(schemastrings.AptNameDescription),
-			"path": defaults.GetPathSchema(schemastrings.AptPathDescription),
+			"id":      defaults.GetIdSchema(),
+			"name":    defaults.GetNameSchema(schemastrings.AptNameDescription),
+			"version": defaults.GetVersionSchema(schemastrings.AptVersionDescription),
+			"path":    defaults.GetPathSchema(schemastrings.AptPathDescription),
 		},
 	}
 }

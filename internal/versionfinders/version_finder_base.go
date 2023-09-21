@@ -9,9 +9,14 @@ import (
 	"github.com/shihanng/terraform-provider-installer/internal/xerrors"
 )
 
+type VersionFinderOptions interface {
+	GetName() string
+	GetVersion() *version.Version
+}
+
 // The basic interface for all installers.
 type VersionFinder interface {
-	FindInstalled(ctx context.Context, options models.InstallerOptions) (*models.InstalledProgramInfo, error)
+	FindInstalled(ctx context.Context, options VersionFinderOptions) (*models.InstalledProgramInfo, error)
 }
 
 const OutputNewline = "\n"

@@ -8,4 +8,6 @@ const AptSourceDescription = "`installer_apt` manages an application using [APT]
 const AptNameDescription = "Name of the application that `apt-get` recognizes." +
 	" Specify a version of a package by following the package name with an equal sign and the version, e.g., `vim=2:8.2.3995-1ubuntu2.7`."
 
+const AptVersionDescription = "Optional version of the application that `apt-get` recognizes. e.g., `2:8.2.3995-1ubuntu2.7`"
+
 const AptPathDescription = "The path where the application is installed by `apt-get` after Terraform creates this resource."
