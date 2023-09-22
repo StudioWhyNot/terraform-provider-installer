@@ -2,6 +2,7 @@ package script
 
 import (
 	"context"
+	"encoding/json"
 	"os/exec"
 
 	"github.com/pkg/errors"
@@ -13,12 +14,12 @@ import (
 
 type ScriptInstallerOptions interface {
 	installers.InstallerOptions
-	GetInstallScript() string
 	GetId() string
 	GetPath() string
+	GetInstallScript() string
 	GetFindInstalledScript() string
 	GetUninstallScript() string
-	GetAdditionalArgs() []string
+	GetAdditionalArgs(ctx context.Context) []string
 }
 
 var _ installers.Installer[ScriptInstallerOptions] = &ScriptInstaller[ScriptInstallerOptions]{}
@@ -40,7 +41,7 @@ func (i *ScriptInstaller[T]) GetInstallerType() enums.InstallerType {
 }
 
 func (i *ScriptInstaller[T]) Install(ctx context.Context, options T) error {
-	args := append([]string{options.GetInstallScript()}, options.GetAdditionalArgs()...)
+	args := append([]string{options.GetInstallScript()}, options.GetAdditionalArgs(ctx)...)
 	out := i.CliWrapper.ExecuteCommand(ctx, args...)
 	return out.Error
 }
@@ -63,10 +64,20 @@ func (i *ScriptInstaller[T]) FindInstalled(ctx context.Context, options T) (*mod
 	if findInstalledScript == "" {
 		return nil, nil
 	}
-	args := append([]string{findInstalledScript}, options.GetAdditionalArgs()...)
+	args := append([]string{findInstalledScript}, options.GetAdditionalArgs(ctx)...)
 	out := i.CliWrapper.ExecuteCommand(ctx, args...)
-	//TODO: parse output
-	return nil, out.Error
+
+	jsonData := out.CombinedOutput
+
+	var info models.InstalledProgramInfo = models.InstalledProgramInfo{}
+	if out.CombinedOutput != "" {
+		err := json.Unmarshal([]byte(jsonData), &info)
+		if err != nil {
+			out.Error = errors.Wrap(err, "Failed to parse JSON output of `find_installed_script`: "+findInstalledScript)
+		}
+	}
+	typedInfo := models.NewTypedInstalledProgramInfoFromInfo(i.GetInstallerType(), info)
+	return &typedInfo, out.Error
 }
 
 func (i *ScriptInstaller[T]) Uninstall(ctx context.Context, options T) (bool, error) {
@@ -75,7 +86,7 @@ func (i *ScriptInstaller[T]) Uninstall(ctx context.Context, options T) (bool, er
 		// Not installed, no error.
 		return false, nil
 	}
-	args := append([]string{options.GetUninstallScript()}, options.GetAdditionalArgs()...)
+	args := append([]string{options.GetUninstallScript()}, options.GetAdditionalArgs(ctx)...)
 	out := i.CliWrapper.ExecuteCommand(ctx, args...)
 	return out.Error == nil, out.Error
 }
@@ -85,9 +96,7 @@ func IsInstalled(path string) (bool, error) {
 		if errors.Is(err, exec.ErrNotFound) {
 			return false, nil
 		}
-
 		return false, errors.Wrap(err, "check if path is installed")
 	}
-
 	return true, nil
 }

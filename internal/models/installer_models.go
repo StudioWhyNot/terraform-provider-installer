@@ -10,8 +10,8 @@ import (
 
 // Name and version of a program.
 type NamedVersion struct {
-	Name    string
-	Version *version.Version
+	Name    string           `json:"name"`
+	Version *version.Version `json:"version"`
 }
 
 func NewNamedVersion(name string, version *version.Version) NamedVersion {
@@ -44,8 +44,8 @@ func (n NamedVersion) Equals(other NamedVersion) bool {
 
 // Information about the installed program.
 type InstalledProgramInfo struct {
-	NamedVersion
-	Path string
+	NamedVersion `json:",inline"`
+	Path         string `json:"path"`
 }
 
 func NewInstalledProgramInfo(name string, version *version.Version, path string) InstalledProgramInfo {
