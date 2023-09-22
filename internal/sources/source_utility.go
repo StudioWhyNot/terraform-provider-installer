@@ -39,7 +39,6 @@ func FillAndSetStateData[T SourceData](source *SourceBase[T], ctx context.Contex
 func DefaultCreate[T SourceData](source *SourceBase[T], plan tfsdk.Plan, state *tfsdk.State, ctx context.Context, diagnostics *diag.Diagnostics) bool {
 	data, success := TryGetInitializedData[T](ctx, plan, diagnostics)
 	if !success {
-		//TODO: See if this needs an error in all cases
 		return false
 	}
 
@@ -68,8 +67,8 @@ func DefaultRead[T SourceData](source *SourceBase[T], state *tfsdk.State, ctx co
 	return true
 }
 
-func DefaultUpdate[T SourceData](source *SourceBase[T], state *tfsdk.State, ctx context.Context, diagnostics *diag.Diagnostics) bool {
-	data, success := TryGetInitializedData[T](ctx, state, diagnostics)
+func DefaultUpdate[T SourceData](source *SourceBase[T], plan tfsdk.Plan, state *tfsdk.State, ctx context.Context, diagnostics *diag.Diagnostics) bool {
+	data, success := TryGetInitializedData[T](ctx, plan, diagnostics)
 	if !success {
 		return false
 	}

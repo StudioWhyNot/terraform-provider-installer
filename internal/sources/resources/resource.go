@@ -37,7 +37,7 @@ func (r *Resource[T]) Read(ctx context.Context, req resource.ReadRequest, resp *
 }
 
 func (r *Resource[T]) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	sources.DefaultUpdate[T](&r.SourceBase, &resp.State, ctx, &resp.Diagnostics)
+	sources.DefaultUpdate[T](&r.SourceBase, req.Plan, &resp.State, ctx, &resp.Diagnostics)
 }
 
 func (r *Resource[T]) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
