@@ -16,7 +16,7 @@ type ScriptInstallerOptions interface {
 	installers.InstallerOptions
 	GetId() string
 	GetPath() string
-	//GetShell() string
+	GetShell() string
 	GetInstallScript() string
 	GetFindInstalledScript() string
 	GetUninstallScript() string
@@ -26,15 +26,14 @@ type ScriptInstallerOptions interface {
 var _ installers.Installer[ScriptInstallerOptions] = &ScriptInstaller[ScriptInstallerOptions]{}
 
 type ScriptInstaller[T ScriptInstallerOptions] struct {
-	CliWrapper cliwrapper.CliWrapper
 }
 
+const SudoDefault = false
+const ProgramDefault = "sh"
+const DefaultArg = "-c"
+
 func NewScriptInstaller[T ScriptInstallerOptions]() *ScriptInstaller[T] {
-	const sudo = false
-	const program = "sh"
-	return &ScriptInstaller[T]{
-		CliWrapper: cliwrapper.NewLocalCliWrapper(sudo, program),
-	}
+	return &ScriptInstaller[T]{}
 }
 
 func (i *ScriptInstaller[T]) GetInstallerType() enums.InstallerType {
@@ -42,8 +41,7 @@ func (i *ScriptInstaller[T]) GetInstallerType() enums.InstallerType {
 }
 
 func (i *ScriptInstaller[T]) Install(ctx context.Context, options T) error {
-	args := append([]string{"-c", options.GetInstallScript()}, options.GetAdditionalArgs(ctx)...)
-	out := i.CliWrapper.ExecuteCommand(ctx, args...)
+	out := i.executeScript(ctx, options, options.GetInstallScript())
 	return out.Error
 }
 
@@ -65,8 +63,7 @@ func (i *ScriptInstaller[T]) FindInstalled(ctx context.Context, options T) (*mod
 	if findInstalledScript == "" {
 		return nil, nil
 	}
-	args := append([]string{"-c", findInstalledScript}, options.GetAdditionalArgs(ctx)...)
-	out := i.CliWrapper.ExecuteCommand(ctx, args...)
+	out := i.executeScript(ctx, options, findInstalledScript)
 
 	jsonData := out.CombinedOutput
 
@@ -87,9 +84,14 @@ func (i *ScriptInstaller[T]) Uninstall(ctx context.Context, options T) (bool, er
 		// Not installed, no error.
 		return false, nil
 	}
-	args := append([]string{"-c", options.GetUninstallScript()}, options.GetAdditionalArgs(ctx)...)
-	out := i.CliWrapper.ExecuteCommand(ctx, args...)
+	out := i.executeScript(ctx, options, options.GetUninstallScript())
 	return out.Error == nil, out.Error
+}
+
+func (i *ScriptInstaller[T]) executeScript(ctx context.Context, options T, script string) cliwrapper.CliOutput {
+	wrapper := installers.GetCliWrapper(options.GetSudo(), options.GetShell())
+	args := append([]string{DefaultArg, script}, options.GetAdditionalArgs(ctx)...)
+	return wrapper.ExecuteCommand(ctx, args...)
 }
 
 func IsInstalled(path string) (bool, error) {

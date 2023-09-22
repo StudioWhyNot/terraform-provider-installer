@@ -3,12 +3,14 @@ package installers
 import (
 	"context"
 
+	"github.com/shihanng/terraform-provider-installer/internal/cliwrapper"
 	"github.com/shihanng/terraform-provider-installer/internal/enums"
 	"github.com/shihanng/terraform-provider-installer/internal/models"
 	"github.com/shihanng/terraform-provider-installer/internal/versionfinders"
 )
 
 type InstallerOptions interface {
+	GetSudo() bool
 }
 
 // The basic interface for all installers.
@@ -26,4 +28,8 @@ func GetInfoFromVersionFinder(installerType enums.InstallerType, versionFinder v
 	}
 	newInfo := models.NewTypedInstalledProgramInfoFromInfo(installerType, *info)
 	return &newInfo, err
+}
+
+func GetCliWrapper(sudo bool, program string) cliwrapper.CliWrapper {
+	return cliwrapper.NewLocalCliWrapper(sudo, program)
 }

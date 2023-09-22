@@ -29,6 +29,11 @@ type ResourceAptModel struct {
 	Name    types.String `tfsdk:"name"`
 	Version types.String `tfsdk:"version"`
 	Path    types.String `tfsdk:"path"`
+	Sudo    types.Bool   `tfsdk:"sudo"`
+}
+
+func (m *ResourceAptModel) GetSudo() bool {
+	return sources.GetBoolOrDefault(m.Sudo, apt.SudoDefault)
 }
 
 func (m *ResourceAptModel) GetNamedVersion() models.NamedVersion {
@@ -76,6 +81,7 @@ func (r *ResourceApt) Schema(ctx context.Context, req resource.SchemaRequest, re
 			"name":    defaults.GetNameSchema(schemastrings.AptNameDescription),
 			"version": defaults.GetVersionSchema(schemastrings.AptVersionDescription),
 			"path":    defaults.GetPathSchema(schemastrings.AptPathDescription),
+			"sudo":    defaults.GetSudoSchema(),
 		},
 	}
 }

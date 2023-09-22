@@ -15,3 +15,5 @@ const ScriptFindInstalledScriptDescription = "is an optional script that will be
 const ScriptUninstallScriptDescription = "is the script that will be called by Terraform when executing `terraform destroy`."
 
 const ScriptAdditionalArgsDescription = "Additional arguments to be passed to the install, uninstall, and find_installed scripts."
+
+const ScriptShellDescription = "Which shell program to use to run the install, uninstall, and find_installed scripts. This shellis followed by the `-c` flag."

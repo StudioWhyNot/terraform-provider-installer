@@ -18,6 +18,7 @@ func getDefaultStringSchema(markdownDescription string, optional bool, requiresR
 		schma.PlanModifiers = []planmodifier.String{
 			stringplanmodifier.RequiresReplace(),
 		}
+		//schma.Default = stringdefault.StaticString("")
 	}
 	return schma
 }
@@ -55,6 +56,13 @@ func GetVersionSchema(markdownDescription string) schema.Attribute {
 	return getDefaultStringSchema(markdownDescription, true, true)
 }
 
+func GetSudoSchema() schema.Attribute {
+	return schema.BoolAttribute{
+		MarkdownDescription: "Whether or not to run the installer as a sudo user.",
+		Optional:            true,
+	}
+}
+
 func GetInstallScriptSchema(markdownDescription string) schema.Attribute {
 	return getDefaultStringSchema(markdownDescription, false, true)
 }
@@ -75,4 +83,8 @@ func GetAdditionalArgsSchema(markdownDescription string) schema.ListAttribute {
 			listplanmodifier.RequiresReplace(),
 		},
 	}
+}
+
+func GetShellSchema(markdownDescription string) schema.Attribute {
+	return getDefaultStringSchema(markdownDescription, true, false)
 }

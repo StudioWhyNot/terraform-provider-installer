@@ -26,6 +26,11 @@ type DataSourceAptModel struct {
 	Name    types.String `tfsdk:"name"`
 	Version types.String `tfsdk:"version"`
 	Path    types.String `tfsdk:"path"`
+	Sudo    types.Bool   `tfsdk:"sudo"`
+}
+
+func (m *DataSourceAptModel) GetSudo() bool {
+	return sources.GetBoolOrDefault(m.Sudo, apt.SudoDefault)
 }
 
 func (m *DataSourceAptModel) GetNamedVersion() models.NamedVersion {
@@ -69,6 +74,7 @@ func (d *DataSourceApt) Schema(ctx context.Context, req datasource.SchemaRequest
 			"name":    defaults.GetNameSchema(schemastrings.AptNameDescription),
 			"version": defaults.GetVersionSchema(schemastrings.AptVersionDescription),
 			"path":    defaults.GetPathSchema(schemastrings.AptPathDescription),
+			"sudo":    defaults.GetSudoSchema(),
 		},
 	}
 }

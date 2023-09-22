@@ -30,4 +30,6 @@ resource "installer_script" "test" {
   rm -f /tmp/installer-myapp-test
   exit 0
   EOF
+
+  shell = "bash"
 }
