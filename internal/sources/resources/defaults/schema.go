@@ -12,6 +12,7 @@ func getDefaultStringSchema(markdownDescription string, optional bool, requiresR
 	schma := schema.StringAttribute{
 		MarkdownDescription: markdownDescription,
 		Optional:            optional,
+		Required:            !optional,
 	}
 	if requiresReplace {
 		schma.PlanModifiers = []planmodifier.String{
@@ -43,7 +44,11 @@ func GetPathSchema(markdownDescription string) schema.Attribute {
 }
 
 func GetScriptPathSchema(markdownDescription string) schema.Attribute {
-	return getDefaultStringSchema(markdownDescription, false, true)
+	return schema.StringAttribute{
+		MarkdownDescription: markdownDescription,
+		Computed:            true,
+		Optional:            true,
+	}
 }
 
 func GetVersionSchema(markdownDescription string) schema.Attribute {

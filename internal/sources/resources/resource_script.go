@@ -64,7 +64,7 @@ func (m *ResourceScriptModel) Initialize() bool {
 		idString = m.FindInstalledScript
 	}
 	m.Id = sources.GetIDFromName(idString, enums.InstallerScript)
-	return idString.IsNull()
+	return !idString.IsNull()
 }
 
 func (m *ResourceScriptModel) CopyFromTypedInstalledProgramInfo(installedInfo *models.TypedInstalledProgramInfo) {

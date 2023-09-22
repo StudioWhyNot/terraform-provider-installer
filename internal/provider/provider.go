@@ -47,6 +47,7 @@ func (p *InstallerProvider) Configure(ctx context.Context, req provider.Configur
 func (p *InstallerProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		resources.NewResourceApt,
+		resources.NewResourceScript,
 	}
 }
 

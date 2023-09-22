@@ -1,16 +1,17 @@
 package schemastrings
 
-const ScriptSourceDescription = "`installer_apt` manages an application using [APT](https://en.wikipedia.org/wiki/APT_(software)).\n\n" +
-	"It works on systems that use APT as the package management system. " +
-	"Adding an `installer_apt` resource means that Terraform will ensure that " +
-	"the application defined in the `name` argument is made available via APT."
+const ScriptSourceDescription = "`installer_script` manages an application using a custom script.\n\n" +
+	"Adding an `installer_script` resource means that Terraform will install " +
+	"application in the `path` by running the `install_script` when creating the resource."
 
-const ScriptPathDescription = "The path where the application is installed by `apt-get` after Terraform creates this resource."
+const ScriptPathDescription = "is an optional location of the application installed by the install script. " +
+	"If the application does not exist at path, then the resource is considered not exist by Terraform.\n\n" +
+	"If not specified, the value will be computed from the `find_installed` script."
 
-const ScriptAdditionalArgsDescription = "Optional version of the application that `apt-get` recognizes. e.g., `2:8.2.3995-1ubuntu2.7`"
+const ScriptInstallScriptDescription = "is the script that will be called by Terraform when executing `terraform plan/apply`."
 
-const ScriptInstallScriptDescription = "Optional version of the application that `apt-get` recognizes. e.g., `2:8.2.3995-1ubuntu2.7`"
+const ScriptFindInstalledScriptDescription = "is an optional script that will be used by terraform to find the path of the installed application."
 
-const ScriptFindInstalledScriptDescription = "Optional version of the application that `apt-get` recognizes. e.g., `2:8.2.3995-1ubuntu2.7`"
+const ScriptUninstallScriptDescription = "is the script that will be called by Terraform when executing `terraform destroy`."
 
-const ScriptUninstallScriptDescription = "Optional version of the application that `apt-get` recognizes. e.g., `2:8.2.3995-1ubuntu2.7`"
+const ScriptAdditionalArgsDescription = "Additional arguments to be passed to the install, uninstall, and find_installed scripts."

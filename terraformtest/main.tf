@@ -1,6 +1,6 @@
-resource "installer_apt" "neofetch" {
-    name = "neofetch"
-}
+# resource "installer_apt" "neofetch" {
+#     name = "neofetch"
+# }
 
 # resource "installer_apt" "example" {
 #   configurable_attribute = "some-value"
@@ -14,20 +14,20 @@ resource "installer_apt" "neofetch" {
 #   }
 # }
 
-# resource "installer_script" "test" {
-#   path           = "/tmp/installer-myapp-test"
-#   install_script = <<-EOF
-#   /bin/bash
+resource "installer_script" "test" {
+  path           = "/tmp/installer-myapp-test"
+  install_script = <<-EOF
+  /bin/bash
 
-#   touch /tmp/installer-myapp-test
-#   chmod +x /tmp/installer-myapp-test
-#   exit 0
-#   EOF
+  touch /tmp/installer-myapp-test
+  chmod +x /tmp/installer-myapp-test
+  exit 0
+  EOF
 
-#   uninstall_script = <<-EOF
-#   /bin/bash
+  uninstall_script = <<-EOF
+  /bin/bash
 
-#   rm -f /tmp/installer-myapp-test
-#   exit 0
-#   EOF
-# }
+  rm -f /tmp/installer-myapp-test
+  exit 0
+  EOF
+}

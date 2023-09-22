@@ -16,6 +16,7 @@ type ScriptInstallerOptions interface {
 	installers.InstallerOptions
 	GetId() string
 	GetPath() string
+	//GetShell() string
 	GetInstallScript() string
 	GetFindInstalledScript() string
 	GetUninstallScript() string
@@ -30,7 +31,7 @@ type ScriptInstaller[T ScriptInstallerOptions] struct {
 
 func NewScriptInstaller[T ScriptInstallerOptions]() *ScriptInstaller[T] {
 	const sudo = false
-	const program = "bash"
+	const program = "sh"
 	return &ScriptInstaller[T]{
 		CliWrapper: cliwrapper.NewLocalCliWrapper(sudo, program),
 	}
@@ -41,7 +42,7 @@ func (i *ScriptInstaller[T]) GetInstallerType() enums.InstallerType {
 }
 
 func (i *ScriptInstaller[T]) Install(ctx context.Context, options T) error {
-	args := append([]string{options.GetInstallScript()}, options.GetAdditionalArgs(ctx)...)
+	args := append([]string{"-c", options.GetInstallScript()}, options.GetAdditionalArgs(ctx)...)
 	out := i.CliWrapper.ExecuteCommand(ctx, args...)
 	return out.Error
 }
@@ -64,7 +65,7 @@ func (i *ScriptInstaller[T]) FindInstalled(ctx context.Context, options T) (*mod
 	if findInstalledScript == "" {
 		return nil, nil
 	}
-	args := append([]string{findInstalledScript}, options.GetAdditionalArgs(ctx)...)
+	args := append([]string{"-c", findInstalledScript}, options.GetAdditionalArgs(ctx)...)
 	out := i.CliWrapper.ExecuteCommand(ctx, args...)
 
 	jsonData := out.CombinedOutput
@@ -86,7 +87,7 @@ func (i *ScriptInstaller[T]) Uninstall(ctx context.Context, options T) (bool, er
 		// Not installed, no error.
 		return false, nil
 	}
-	args := append([]string{options.GetUninstallScript()}, options.GetAdditionalArgs(ctx)...)
+	args := append([]string{"-c", options.GetUninstallScript()}, options.GetAdditionalArgs(ctx)...)
 	out := i.CliWrapper.ExecuteCommand(ctx, args...)
 	return out.Error == nil, out.Error
 }
