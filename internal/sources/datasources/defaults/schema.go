@@ -32,6 +32,5 @@ func GetSudoSchema() schema.BoolAttribute {
 	return schema.BoolAttribute{
 		MarkdownDescription: "Whether or not to run the installer as a sudo user.",
 		Optional:            true,
-		Computed:            true,
 	}
 }
