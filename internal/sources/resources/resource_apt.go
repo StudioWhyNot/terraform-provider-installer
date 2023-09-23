@@ -33,7 +33,7 @@ type ResourceAptModel struct {
 }
 
 func (m *ResourceAptModel) GetSudo() bool {
-	return sources.GetBoolOrDefault(m.Sudo, apt.SudoDefault)
+	return m.Sudo.ValueBool()
 }
 
 func (m *ResourceAptModel) GetNamedVersion() models.NamedVersion {
@@ -81,7 +81,7 @@ func (r *ResourceApt) Schema(ctx context.Context, req resource.SchemaRequest, re
 			"name":    defaults.GetNameSchema(schemastrings.AptNameDescription),
 			"version": defaults.GetVersionSchema(schemastrings.AptVersionDescription),
 			"path":    defaults.GetPathSchema(schemastrings.AptPathDescription),
-			"sudo":    defaults.GetSudoSchema(),
+			"sudo":    defaults.GetSudoSchema(apt.DefaultSudo),
 		},
 	}
 }

@@ -2,13 +2,15 @@ package defaults
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func getDefaultStringSchema(markdownDescription string, optional bool, requiresReplace bool) schema.Attribute {
+func getDefaultStringSchema(markdownDescription string, optional bool, requiresReplace bool) schema.StringAttribute {
 	schma := schema.StringAttribute{
 		MarkdownDescription: markdownDescription,
 		Optional:            optional,
@@ -23,7 +25,7 @@ func getDefaultStringSchema(markdownDescription string, optional bool, requiresR
 	return schma
 }
 
-func GetIdSchema() schema.Attribute {
+func GetIdSchema() schema.StringAttribute {
 	return schema.StringAttribute{
 		MarkdownDescription: "Internal ID of the resource.",
 		Computed:            true,
@@ -33,18 +35,18 @@ func GetIdSchema() schema.Attribute {
 	}
 }
 
-func GetNameSchema(markdownDescription string) schema.Attribute {
+func GetNameSchema(markdownDescription string) schema.StringAttribute {
 	return getDefaultStringSchema(markdownDescription, true, true)
 }
 
-func GetPathSchema(markdownDescription string) schema.Attribute {
+func GetPathSchema(markdownDescription string) schema.StringAttribute {
 	return schema.StringAttribute{
 		MarkdownDescription: markdownDescription,
 		Computed:            true,
 	}
 }
 
-func GetScriptPathSchema(markdownDescription string) schema.Attribute {
+func GetScriptPathSchema(markdownDescription string) schema.StringAttribute {
 	return schema.StringAttribute{
 		MarkdownDescription: markdownDescription,
 		Computed:            true,
@@ -52,26 +54,28 @@ func GetScriptPathSchema(markdownDescription string) schema.Attribute {
 	}
 }
 
-func GetVersionSchema(markdownDescription string) schema.Attribute {
+func GetVersionSchema(markdownDescription string) schema.StringAttribute {
 	return getDefaultStringSchema(markdownDescription, true, true)
 }
 
-func GetSudoSchema() schema.Attribute {
+func GetSudoSchema(defaultVal bool) schema.BoolAttribute {
 	return schema.BoolAttribute{
 		MarkdownDescription: "Whether or not to run the installer as a sudo user.",
 		Optional:            true,
+		Computed:            true,
+		Default:             booldefault.StaticBool(defaultVal),
 	}
 }
 
-func GetInstallScriptSchema(markdownDescription string) schema.Attribute {
+func GetInstallScriptSchema(markdownDescription string) schema.StringAttribute {
 	return getDefaultStringSchema(markdownDescription, false, true)
 }
 
-func GetFindInstalledScriptSchema(markdownDescription string) schema.Attribute {
+func GetFindInstalledScriptSchema(markdownDescription string) schema.StringAttribute {
 	return getDefaultStringSchema(markdownDescription, true, true)
 }
 
-func GetUninstallScriptSchema(markdownDescription string) schema.Attribute {
+func GetUninstallScriptSchema(markdownDescription string) schema.StringAttribute {
 	return getDefaultStringSchema(markdownDescription, false, true)
 }
 
@@ -85,6 +89,9 @@ func GetAdditionalArgsSchema(markdownDescription string) schema.ListAttribute {
 	}
 }
 
-func GetShellSchema(markdownDescription string) schema.Attribute {
-	return getDefaultStringSchema(markdownDescription, true, false)
+func GetShellSchema(markdownDescription string, defaultVal string) schema.StringAttribute {
+	schma := getDefaultStringSchema(markdownDescription, true, false)
+	schma.Computed = true
+	schma.Default = stringdefault.StaticString(defaultVal)
+	return schma
 }

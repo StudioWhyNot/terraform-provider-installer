@@ -73,6 +73,7 @@ func DefaultUpdate[T SourceData](source *SourceBase[T], plan tfsdk.Plan, state *
 		return false
 	}
 
+	FillAndSetStateData(source, ctx, state, diagnostics, data)
 	// Save updated data into Terraform state
 	diags := state.Set(ctx, &data)
 	diagnostics.Append(diags...)

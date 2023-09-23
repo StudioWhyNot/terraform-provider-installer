@@ -1,5 +1,11 @@
-# resource "installer_apt" "neofetch" {
-#     name = "neofetch"
+resource "installer_apt" "neofetch" {
+    name = "neofetch"
+    #sudo = true
+}
+
+# resource "installer_apt" "dos2unix" {
+#     depends_on = [installer_apt.neofetch]
+#     name = "dos2unix"
 # }
 
 # resource "installer_apt" "example" {
@@ -17,19 +23,15 @@
 resource "installer_script" "test" {
   path           = "/tmp/installer-myapp-test"
   install_script = <<-EOF
-  /bin/bash
-
   touch /tmp/installer-myapp-test
   chmod +x /tmp/installer-myapp-test
   exit 0
   EOF
 
   uninstall_script = <<-EOF
-  /bin/bash
-
   rm -f /tmp/installer-myapp-test
   exit 0
   EOF
 
-  shell = "bash"
+  #shell = "bash"
 }

@@ -61,11 +61,11 @@ func (m *ResourceScriptModel) GetAdditionalArgs(ctx context.Context) []string {
 }
 
 func (m *ResourceScriptModel) GetSudo() bool {
-	return sources.GetBoolOrDefault(m.Sudo, script.SudoDefault)
+	return m.Sudo.ValueBool()
 }
 
 func (m *ResourceScriptModel) GetShell() string {
-	return sources.GetStringOrDefault(m.Shell, script.ProgramDefault)
+	return m.Shell.ValueString()
 }
 
 func (m *ResourceScriptModel) Initialize() bool {
@@ -103,8 +103,8 @@ func (r *ResourceScript) Schema(ctx context.Context, req resource.SchemaRequest,
 			"find_installed_script": defaults.GetFindInstalledScriptSchema(schemastrings.ScriptFindInstalledScriptDescription),
 			"uninstall_script":      defaults.GetUninstallScriptSchema(schemastrings.ScriptUninstallScriptDescription),
 			"additional_args":       defaults.GetAdditionalArgsSchema(schemastrings.ScriptAdditionalArgsDescription),
-			"sudo":                  defaults.GetSudoSchema(),
-			"shell":                 defaults.GetShellSchema(schemastrings.ScriptShellDescription),
+			"sudo":                  defaults.GetSudoSchema(script.DefaultSudo),
+			"shell":                 defaults.GetShellSchema(schemastrings.ScriptShellDescription, script.DefaultProgram),
 		},
 	}
 }

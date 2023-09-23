@@ -28,8 +28,8 @@ var _ installers.Installer[ScriptInstallerOptions] = &ScriptInstaller[ScriptInst
 type ScriptInstaller[T ScriptInstallerOptions] struct {
 }
 
-const SudoDefault = false
-const ProgramDefault = "sh"
+const DefaultSudo = false
+const DefaultProgram = "sh"
 const DefaultArg = "-c"
 
 func NewScriptInstaller[T ScriptInstallerOptions]() *ScriptInstaller[T] {
