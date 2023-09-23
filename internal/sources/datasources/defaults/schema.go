@@ -2,6 +2,7 @@ package defaults
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/shihanng/terraform-provider-installer/internal/sources/schemastrings"
 )
 
 func getDefaultStringSchema(markdownDescription string, optional bool) schema.StringAttribute {
@@ -30,7 +31,7 @@ func GetVersionSchema(markdownDescription string) schema.StringAttribute {
 
 func GetSudoSchema() schema.BoolAttribute {
 	return schema.BoolAttribute{
-		MarkdownDescription: "Whether or not to run the installer as a sudo user.",
+		MarkdownDescription: schemastrings.DefaultSudoDescription,
 		Optional:            true,
 	}
 }
