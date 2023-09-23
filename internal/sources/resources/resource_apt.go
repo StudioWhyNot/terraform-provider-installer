@@ -37,7 +37,7 @@ func (m *ResourceAptModel) GetSudo() bool {
 }
 
 func (m *ResourceAptModel) GetNamedVersion() models.NamedVersion {
-	return models.NewNamedVersionFromStrings(m.Name.ValueString(), m.Version.ValueString())
+	return models.NewNamedVersionFromStrings(apt.VersionSeperator, m.Name.ValueString(), m.Version.ValueString())
 }
 
 func (m *ResourceAptModel) GetName() string {
@@ -49,7 +49,7 @@ func (m *ResourceAptModel) GetVersion() *version.Version {
 }
 
 func (m *ResourceAptModel) Initialize() bool {
-	m.Id = sources.GetIDFromNameAndVersion(m.Name, m.Version, enums.InstallerApt)
+	m.Id = sources.GetIDFromNameAndVersion(apt.VersionSeperator, m.Name, m.Version, enums.InstallerApt)
 	return !m.Name.IsNull()
 }
 

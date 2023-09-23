@@ -13,8 +13,9 @@ type TestInfo[T any] struct {
 const errInvalidVersion = "invalid version in test"
 
 func NewAptTestInfo(name string, version string) TestInfo[apt.AptInstallerOptions] {
-	name = models.GetCombinedNameVersionStrings(name, version)
-	options, err := models.NewInstallerOptions(name, nil)
+	seperator := apt.VersionSeperator
+	name = models.GetCombinedNameVersionStrings(seperator, name, version)
+	options, err := models.NewInstallerOptions(seperator, name, nil)
 
 	if err != nil {
 		panic(errInvalidVersion)
@@ -23,7 +24,7 @@ func NewAptTestInfo(name string, version string) TestInfo[apt.AptInstallerOption
 	return TestInfo[apt.AptInstallerOptions]{
 		//TODO: Fix this
 		//Input:    options,
-		Expected: models.NewNamedVersion(options.Name, options.Version),
+		Expected: models.NewNamedVersion(seperator, options.Name, options.Version),
 	}
 }
 

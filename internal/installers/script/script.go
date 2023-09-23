@@ -31,6 +31,7 @@ type ScriptInstaller[T ScriptInstallerOptions] struct {
 const DefaultSudo = false
 const DefaultProgram = "sh"
 const DefaultArg = "-c"
+const VersionSeperator = "="
 
 func NewScriptInstaller[T ScriptInstallerOptions]() *ScriptInstaller[T] {
 	return &ScriptInstaller[T]{}
@@ -54,7 +55,7 @@ func (i *ScriptInstaller[T]) FindInstalled(ctx context.Context, options T) (*mod
 			return nil, err
 		}
 		if installed {
-			newInfo := models.NewTypedInstalledProgramInfo(i.GetInstallerType(), options.GetId(), nil, path)
+			newInfo := models.NewTypedInstalledProgramInfo(i.GetInstallerType(), VersionSeperator, options.GetId(), nil, path)
 			return &newInfo, nil
 		}
 	}
@@ -68,6 +69,7 @@ func (i *ScriptInstaller[T]) FindInstalled(ctx context.Context, options T) (*mod
 	jsonData := out.CombinedOutput
 
 	var info models.InstalledProgramInfo = models.InstalledProgramInfo{}
+	info.Seperator = VersionSeperator
 	if out.CombinedOutput != "" {
 		err := json.Unmarshal([]byte(jsonData), &info)
 		if err != nil {

@@ -26,6 +26,7 @@ type AptInstaller[T AptInstallerOptions] struct {
 
 const DefaultSudo = true
 const DefaultProgram = "apt-get"
+const VersionSeperator = "="
 
 func NewAptInstaller[T AptInstallerOptions]() *AptInstaller[T] {
 	return &AptInstaller[T]{
@@ -59,9 +60,9 @@ func (i *AptInstaller[T]) Uninstall(ctx context.Context, options T) (bool, error
 }
 
 func aptInstall(ctx context.Context, wrapper cliwrapper.CliWrapper, name string, version *version.Version) cliwrapper.CliOutput {
-	return wrapper.ExecuteCommand(ctx, "-y", "install", models.GetVersionedName(name, version))
+	return wrapper.ExecuteCommand(ctx, "-y", "install", models.GetVersionedName(VersionSeperator, name, version))
 }
 
 func aptRemove(ctx context.Context, wrapper cliwrapper.CliWrapper, name string, version *version.Version) cliwrapper.CliOutput {
-	return wrapper.ExecuteCommand(ctx, "-y", "remove", models.GetVersionedName(name, version))
+	return wrapper.ExecuteCommand(ctx, "-y", "remove", models.GetVersionedName(VersionSeperator, name, version))
 }

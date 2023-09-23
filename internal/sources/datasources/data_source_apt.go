@@ -34,7 +34,7 @@ func (m *DataSourceAptModel) GetSudo() bool {
 }
 
 func (m *DataSourceAptModel) GetNamedVersion() models.NamedVersion {
-	return models.NewNamedVersionFromStrings(m.Name.ValueString(), m.Version.ValueString())
+	return models.NewNamedVersionFromStrings(apt.VersionSeperator, m.Name.ValueString(), m.Version.ValueString())
 }
 
 func (m *DataSourceAptModel) GetName() string {

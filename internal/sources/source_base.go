@@ -29,8 +29,8 @@ func GetIDFromName(name types.String, installerType enums.InstallerType) types.S
 	return types.StringValue(installerType.GetIDFromName(name.ValueString()))
 }
 
-func GetIDFromNameAndVersion(name types.String, version types.String, installerType enums.InstallerType) types.String {
-	return types.StringValue(models.GetIDFromNameAndVersion(name.ValueString(), version.ValueString(), installerType))
+func GetIDFromNameAndVersion(seperator string, name types.String, version types.String, installerType enums.InstallerType) types.String {
+	return types.StringValue(models.GetIDFromNameAndVersion(seperator, name.ValueString(), version.ValueString(), installerType))
 }
 
 type TerraformDataProvider interface {
