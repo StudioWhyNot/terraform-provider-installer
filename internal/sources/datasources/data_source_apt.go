@@ -30,7 +30,7 @@ type DataSourceAptModel struct {
 }
 
 func (m *DataSourceAptModel) GetSudo() bool {
-	return sources.GetBoolOrDefault(m.Sudo, apt.DefaultSudo)
+	return m.Sudo.ValueBool()
 }
 
 func (m *DataSourceAptModel) GetNamedVersion() models.NamedVersion {

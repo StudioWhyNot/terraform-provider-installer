@@ -5,7 +5,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/shihanng/terraform-provider-installer/internal/xerrors"
 )
@@ -91,18 +90,4 @@ func DefaultDelete[T SourceData](source *SourceBase[T], state *tfsdk.State, ctx 
 	}
 	state.RemoveResource(ctx)
 	return true
-}
-
-func GetBoolOrDefault(value types.Bool, defaultValue bool) bool {
-	if value.IsNull() {
-		return defaultValue
-	}
-	return value.ValueBool()
-}
-
-func GetStringOrDefault(value types.String, defaultValue string) string {
-	if value.IsNull() {
-		return defaultValue
-	}
-	return value.ValueString()
 }
