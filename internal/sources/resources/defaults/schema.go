@@ -1,9 +1,11 @@
 package defaults
 
 import (
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -101,6 +103,18 @@ func GetAdditionalArgsSchema(markdownDescription string) schema.ListAttribute {
 		PlanModifiers: []planmodifier.List{
 			listplanmodifier.RequiresReplace(),
 		},
+	}
+}
+
+func GetDefaultArgsSchema(markdownDescription string, defaultArg string) schema.ListAttribute {
+	args, _ := types.ListValue(types.StringType, []attr.Value{types.StringValue(defaultArg)})
+	return schema.ListAttribute{
+		ElementType: types.StringType,
+		Optional:    true,
+		PlanModifiers: []planmodifier.List{
+			listplanmodifier.RequiresReplace(),
+		},
+		Default: listdefault.StaticValue(args),
 	}
 }
 

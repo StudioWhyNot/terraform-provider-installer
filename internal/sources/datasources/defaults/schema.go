@@ -14,6 +14,14 @@ func getDefaultStringSchema(markdownDescription string, optional bool) schema.St
 	return schma
 }
 
+func getDefaultBoolSchema(markdownDescription string, optional bool) schema.BoolAttribute {
+	schma := schema.BoolAttribute{
+		MarkdownDescription: markdownDescription,
+		Optional:            optional,
+	}
+	return schma
+}
+
 func GetNameSchema(markdownDescription string) schema.StringAttribute {
 	return getDefaultStringSchema(markdownDescription, false)
 }
@@ -30,8 +38,9 @@ func GetVersionSchema(markdownDescription string) schema.StringAttribute {
 }
 
 func GetSudoSchema() schema.BoolAttribute {
-	return schema.BoolAttribute{
-		MarkdownDescription: schemastrings.DefaultSudoDescription,
-		Optional:            true,
-	}
+	return getDefaultBoolSchema(schemastrings.DefaultSudoDescription, true)
+}
+
+func GetCaskSchema() schema.BoolAttribute {
+	return getDefaultBoolSchema(schemastrings.BrewCaskDescription, true)
 }

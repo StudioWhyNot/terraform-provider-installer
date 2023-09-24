@@ -21,6 +21,7 @@ type ScriptInstallerOptions interface {
 	GetFindInstalledScript() string
 	GetUninstallScript() string
 	GetAdditionalArgs(ctx context.Context) []string
+	GetDefaultArgs(ctx context.Context) []string
 }
 
 var _ installers.Installer[ScriptInstallerOptions] = &ScriptInstaller[ScriptInstallerOptions]{}
@@ -92,7 +93,8 @@ func (i *ScriptInstaller[T]) Uninstall(ctx context.Context, options T) (bool, er
 
 func (i *ScriptInstaller[T]) executeScript(ctx context.Context, options T, script string) cliwrapper.CliOutput {
 	wrapper := installers.GetCliWrapper(options.GetSudo(), options.GetShell())
-	args := append([]string{DefaultArg, script}, options.GetAdditionalArgs(ctx)...)
+	args := append(options.GetDefaultArgs(ctx), script)
+	args = append(args, options.GetAdditionalArgs(ctx)...)
 	return wrapper.ExecuteCommand(ctx, args...)
 }
 

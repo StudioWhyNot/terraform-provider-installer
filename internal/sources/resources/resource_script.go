@@ -29,6 +29,7 @@ type ResourceScriptModel struct {
 	InstallScript       types.String `tfsdk:"install_script"`
 	FindInstalledScript types.String `tfsdk:"find_installed_script"`
 	UninstallScript     types.String `tfsdk:"uninstall_script"`
+	DefaultArgs         types.List   `tfsdk:"default_args"`
 	AdditionalArgs      types.List   `tfsdk:"additional_args"`
 	Sudo                types.Bool   `tfsdk:"sudo"`
 	Shell               types.String `tfsdk:"shell"`
@@ -57,6 +58,12 @@ func (m *ResourceScriptModel) GetUninstallScript() string {
 func (m *ResourceScriptModel) GetAdditionalArgs(ctx context.Context) []string {
 	var args []string
 	m.AdditionalArgs.ElementsAs(ctx, args, false)
+	return args
+}
+
+func (m *ResourceScriptModel) GetDefaultArgs(ctx context.Context) []string {
+	var args []string
+	m.DefaultArgs.ElementsAs(ctx, args, false)
 	return args
 }
 
@@ -103,6 +110,7 @@ func (r *ResourceScript) Schema(ctx context.Context, req resource.SchemaRequest,
 			"find_installed_script": defaults.GetFindInstalledScriptSchema(schemastrings.ScriptFindInstalledScriptDescription),
 			"uninstall_script":      defaults.GetUninstallScriptSchema(schemastrings.ScriptUninstallScriptDescription),
 			"additional_args":       defaults.GetAdditionalArgsSchema(schemastrings.ScriptAdditionalArgsDescription),
+			"default_args":          defaults.GetDefaultArgsSchema(schemastrings.ScriptDefaultArgsDescription, script.DefaultArg),
 			"sudo":                  defaults.GetSudoSchema(script.DefaultSudo),
 			"shell":                 defaults.GetShellSchema(schemastrings.ScriptShellDescription, script.DefaultProgram),
 		},

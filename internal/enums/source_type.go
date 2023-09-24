@@ -10,12 +10,14 @@ const (
 	InstallerNone InstallerType = iota
 	InstallerApt
 	InstallerScript
+	InstallerBrew
 )
 
 var sourceTypeToString = map[InstallerType]string{
 	InstallerNone:   "none",
 	InstallerApt:    "apt",
 	InstallerScript: "script",
+	InstallerBrew:   "brew",
 }
 
 func (s InstallerType) String() string {
