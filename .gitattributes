@@ -1,0 +1,8 @@
+* text=auto
+
+*.env eol=lf
+*.sh eol=lf
+*.tpl eol=lf
+*.yaml eol=lf
+*.tf eol=lf
+*.go eol=lf

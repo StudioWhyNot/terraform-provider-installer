@@ -1,4 +1,8 @@
 provider "installer" {
-    //endpoint = "test_endpoint"
-    
+    remote_connection {
+        type = "ssh"
+        host = "changeme"
+        user = "root"
+        password = "changeme"
+    }
 }
