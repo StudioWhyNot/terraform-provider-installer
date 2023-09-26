@@ -1,22 +1,18 @@
 package system
 
 import (
-	"os/exec"
-
-	"github.com/cockroachdb/errors"
+	"strings"
 )
 
-var errNotExecutable = errors.New("could not find executable path")
-
-func FindExecutablePath(paths []string) (string, error) {
+func FindExecutablePath(paths []string, programName string) (string, error) {
+	binPath := "bin/" + programName
+	sbinPath := "sbin/" + programName
 	for _, path := range paths {
-		_, err := exec.LookPath(path)
-		if err != nil {
-			continue
+		found := strings.HasSuffix(path, binPath) || strings.HasSuffix(path, sbinPath)
+		if found {
+			return path, nil
 		}
-
-		return path, nil
 	}
-
-	return "", errNotExecutable
+	//Not finding an executable should not be an error, such as with apt.
+	return "", nil
 }

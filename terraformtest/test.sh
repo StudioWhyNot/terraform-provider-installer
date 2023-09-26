@@ -1,5 +1,5 @@
 #!/bin/bash
-#export TF_REATTACH_PROVIDERS='{"registry.terraform.io/shihanng/installer":{"Protocol":"grpc","ProtocolVersion":6,"Pid":4515,"Test":true,"Addr":{"Network":"unix","String":"/tmp/plugin1026672476"}}}'
+#export TF_REATTACH_PROVIDERS='{"registry.terraform.io/shihanng/installer":{"Protocol":"grpc","ProtocolVersion":6,"Pid":20023,"Test":true,"Addr":{"Network":"unix","String":"/tmp/plugin2814904504"}}}'
 export TF_CLI_CONFIG_FILE=$(pwd)/../.terraformrc
 export TF_LOG_PROVIDER=""
 export TF_LOG="WARN"

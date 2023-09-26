@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/shihanng/terraform-provider-installer/internal/installers"
 	"github.com/shihanng/terraform-provider-installer/internal/sources"
+	"github.com/shihanng/terraform-provider-installer/internal/terraform/communicator"
 )
 
 // DataSource[T] defines the generic data source implementation.
@@ -25,7 +26,9 @@ func (d *DataSource[T]) Metadata(ctx context.Context, req datasource.MetadataReq
 }
 
 func (d *DataSource[T]) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
-	//Nothing to configure.
+	if req.ProviderData != nil {
+		d.Communicator = req.ProviderData.(communicator.Communicator)
+	}
 }
 
 func (d *DataSource[T]) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

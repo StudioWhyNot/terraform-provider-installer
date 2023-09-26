@@ -1,6 +1,6 @@
 resource "installer_apt" "neofetch" {
     name = "neofetch"
-    #sudo = true
+    sudo = false
 }
 
 # resource "installer_apt" "dos2unix" {

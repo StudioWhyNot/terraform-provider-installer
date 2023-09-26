@@ -28,13 +28,6 @@ var (
 	// https://goreleaser.com/cookbooks/using-main.version/
 )
 
-type OutputTest struct {
-}
-
-func (o *OutputTest) Output(val string) {
-	log.Println(val)
-}
-
 func main() {
 	var debug bool = true
 

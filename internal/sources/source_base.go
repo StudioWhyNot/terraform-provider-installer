@@ -8,6 +8,7 @@ import (
 	"github.com/shihanng/terraform-provider-installer/internal/enums"
 	"github.com/shihanng/terraform-provider-installer/internal/installers"
 	"github.com/shihanng/terraform-provider-installer/internal/models"
+	"github.com/shihanng/terraform-provider-installer/internal/system"
 	"github.com/shihanng/terraform-provider-installer/internal/terraform/communicator"
 )
 
@@ -30,6 +31,20 @@ func NewSourceBase[T any](installer installers.Installer[T]) *SourceBase[T] {
 
 func (s *SourceBase[T]) GetCommunicator() communicator.Communicator {
 	return s.Communicator
+}
+
+func (s *SourceBase[T]) TryConnect() error {
+	if s.Communicator == nil {
+		return nil
+	}
+	return s.Communicator.Connect(system.NewDefaultLogger())
+}
+
+func (s *SourceBase[T]) TryDisconnect() error {
+	if s.Communicator == nil {
+		return nil
+	}
+	return s.Communicator.Disconnect()
 }
 
 func GetIDFromName(name types.String, installerType enums.InstallerType) types.String {

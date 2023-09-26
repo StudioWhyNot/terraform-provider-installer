@@ -27,11 +27,22 @@ func SetStateData(ctx context.Context, state *tfsdk.State, diagnostics *diag.Dia
 }
 
 func FillAndSetStateData[T SourceData](source *SourceBase[T], ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics, data T) {
+	err := source.TryConnect()
+	if err != nil {
+		xerrors.AppendToDiagnostics(diagnostics, err)
+		return
+	}
 	info, err := source.Installer.FindInstalled(ctx, data)
 	if err != nil {
 		state.RemoveResource(ctx)
 	}
-	data.CopyFromTypedInstalledProgramInfo(info)
+	if info != nil {
+		data.CopyFromTypedInstalledProgramInfo(info)
+	}
+	err = source.TryDisconnect()
+	if err != nil {
+		xerrors.AppendToDiagnostics(diagnostics, err)
+	}
 	SetStateData(ctx, state, diagnostics, &data)
 }
 
@@ -41,11 +52,22 @@ func DefaultCreate[T SourceData](source *SourceBase[T], plan tfsdk.Plan, state *
 		return false
 	}
 
-	err := source.Installer.Install(ctx, data)
+	err := source.TryConnect()
+	if err != nil {
+		xerrors.AppendToDiagnostics(diagnostics, err)
+		return false
+	}
+
+	err = source.Installer.Install(ctx, data)
 	if err != nil {
 		xerrors.AppendToDiagnostics(diagnostics, err)
 		state.RemoveResource(ctx)
 		return false
+	}
+
+	err = source.TryDisconnect()
+	if err != nil {
+		xerrors.AppendToDiagnostics(diagnostics, err)
 	}
 
 	// Write logs using the tflog package
@@ -85,9 +107,20 @@ func DefaultDelete[T SourceData](source *SourceBase[T], state *tfsdk.State, ctx 
 		return false
 	}
 
+	err := source.TryConnect()
+	if err != nil {
+		xerrors.AppendToDiagnostics(diagnostics, err)
+		return false
+	}
+
 	if _, err := source.Installer.Uninstall(ctx, data); err != nil {
 		xerrors.AppendToDiagnostics(diagnostics, err)
 	}
 	state.RemoveResource(ctx)
+
+	err = source.TryDisconnect()
+	if err != nil {
+		xerrors.AppendToDiagnostics(diagnostics, err)
+	}
 	return true
 }

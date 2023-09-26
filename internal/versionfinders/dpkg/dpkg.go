@@ -51,7 +51,7 @@ func (i *DpkgVersionFinder) FindInstalled(ctx context.Context, options versionfi
 
 	paths := strings.Split(out.CombinedOutput, versionfinders.OutputNewline)
 
-	info.Path, out.Error = system.FindExecutablePath(paths) // nolint:wrapcheck
+	info.Path, out.Error = system.FindExecutablePath(paths, info.Name)
 	if out.Error != nil {
 		return nil, out.Error
 	}
