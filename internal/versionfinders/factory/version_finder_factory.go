@@ -6,11 +6,11 @@ import (
 	"github.com/shihanng/terraform-provider-installer/internal/versionfinders/dpkg"
 )
 
-func VersionFinderFactory(vfType enums.VersionFinderType) versionfinders.VersionFinder {
+func VersionFinderFactory(vfType enums.VersionFinderType, config versionfinders.VersionFinderConfig) versionfinders.VersionFinder {
 	switch vfType {
 	default:
 		fallthrough
 	case enums.VersionFinderDpkg:
-		return dpkg.NewDpkgVersionFinder()
+		return dpkg.NewDpkgVersionFinder(config)
 	}
 }

@@ -94,9 +94,9 @@ type ResourceScript struct {
 }
 
 func NewResourceScript() resource.Resource {
-	return &ResourceScript{
-		Resource: NewResource[*ResourceScriptModel](script.NewScriptInstaller[*ResourceScriptModel]()),
-	}
+	resource := &ResourceScript{}
+	resource.Resource = NewResource[*ResourceScriptModel](script.NewScriptInstaller[*ResourceScriptModel](resource))
+	return resource
 }
 
 func (r *ResourceScript) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {

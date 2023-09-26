@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package configschema
 
@@ -123,7 +123,7 @@ type NestingMode int
 //go:generate go run golang.org/x/tools/cmd/stringer -type=NestingMode
 
 const (
-	nestingModeInvalid NestingMode = iota
+	NestingModeInvalid NestingMode = iota
 
 	// NestingSingle indicates that only a single instance of a given
 	// block type is permitted, with no labels, and its content should be

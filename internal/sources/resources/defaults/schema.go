@@ -111,6 +111,7 @@ func GetDefaultArgsSchema(markdownDescription string, defaultArg string) schema.
 	return schema.ListAttribute{
 		ElementType: types.StringType,
 		Optional:    true,
+		Computed:    true,
 		PlanModifiers: []planmodifier.List{
 			listplanmodifier.RequiresReplace(),
 		},

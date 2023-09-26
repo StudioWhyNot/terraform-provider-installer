@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/go-version"
 	"github.com/shihanng/terraform-provider-installer/internal/cliwrapper"
+	"github.com/shihanng/terraform-provider-installer/internal/cliwrapper/clioutput"
 	"github.com/shihanng/terraform-provider-installer/internal/enums"
 	"github.com/shihanng/terraform-provider-installer/internal/installers"
 	"github.com/shihanng/terraform-provider-installer/internal/models"
@@ -22,6 +23,7 @@ type BrewInstallerOptions interface {
 var _ installers.Installer[BrewInstallerOptions] = &BrewInstaller[BrewInstallerOptions]{}
 
 type BrewInstaller[T BrewInstallerOptions] struct {
+	installers.InstallerConfig
 	VersionFinder versionfinders.VersionFinder
 }
 
@@ -30,9 +32,10 @@ const DefaultProgram = "brew"
 const DefaultCask = false
 const VersionSeperator = "@"
 
-func NewBrewInstaller[T BrewInstallerOptions]() *BrewInstaller[T] {
+func NewBrewInstaller[T BrewInstallerOptions](config installers.InstallerConfig) *BrewInstaller[T] {
 	return &BrewInstaller[T]{
-		VersionFinder: factory.VersionFinderFactory(enums.VersionFinderDpkg),
+		InstallerConfig: config,
+		VersionFinder:   factory.VersionFinderFactory(enums.VersionFinderDpkg, config),
 	}
 }
 
@@ -57,7 +60,7 @@ func (i *BrewInstaller[T]) Uninstall(ctx context.Context, options T) (bool, erro
 		// Not installed, no error.
 		return false, nil
 	}
-	wrapper := installers.GetCliWrapper(options.GetSudo(), DefaultProgram)
+	wrapper := i.GetCliWrapper(options.GetSudo())
 	out := brewUninstall(ctx, wrapper, options.GetName(), options.GetVersion())
 	return out.Error == nil, out.Error
 }
@@ -68,6 +71,10 @@ func (i *BrewInstaller[T]) getBrewCommand(options T, command string, withJSONV2 
 	args := getBrewOptionsWithVersionedName(brewOptions, options.GetName(), options.GetVersion())
 	args = append(commandArray, args...)
 	return args
+}
+
+func (i *BrewInstaller[T]) GetCliWrapper(sudo bool) cliwrapper.CliWrapper {
+	return cliwrapper.New(i, sudo, DefaultProgram)
 }
 
 type brewOptions int
@@ -109,6 +116,6 @@ func getBrewOptionsWithVersionedName(options brewOptions, name string, version *
 // 	return wrapper.ExecuteCommand(ctx, "install", getBrewOptionsWithVersionedName(options, name, version))
 // }
 
-func brewUninstall(ctx context.Context, wrapper cliwrapper.CliWrapper, name string, version *version.Version) cliwrapper.CliOutput {
+func brewUninstall(ctx context.Context, wrapper cliwrapper.CliWrapper, name string, version *version.Version) clioutput.CliOutput {
 	return wrapper.ExecuteCommand(ctx, "uninstall", models.GetVersionedName(VersionSeperator, name, version))
 }

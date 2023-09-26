@@ -68,9 +68,9 @@ type DataSourceBrew struct {
 }
 
 func NewDataSourceBrew() datasource.DataSource {
-	return &DataSourceBrew{
-		DataSource: NewDataSource[*DataSourceBrewModel](brew.NewBrewInstaller[*DataSourceBrewModel]()),
-	}
+	resource := &DataSourceBrew{}
+	resource.DataSource = NewDataSource[*DataSourceBrewModel](brew.NewBrewInstaller[*DataSourceBrewModel](resource))
+	return resource
 }
 
 func (d *DataSourceBrew) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {

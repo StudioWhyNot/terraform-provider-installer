@@ -67,9 +67,9 @@ type ResourceApt struct {
 }
 
 func NewResourceApt() resource.Resource {
-	return &ResourceApt{
-		Resource: NewResource[*ResourceAptModel](apt.NewAptInstaller[*ResourceAptModel]()),
-	}
+	resource := &ResourceApt{}
+	resource.Resource = NewResource[*ResourceAptModel](apt.NewAptInstaller[*ResourceAptModel](resource))
+	return resource
 }
 
 func (r *ResourceApt) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {

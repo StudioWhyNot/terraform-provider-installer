@@ -6,6 +6,7 @@ import (
 
 	"github.com/cockroachdb/errors"
 	"github.com/shihanng/terraform-provider-installer/internal/cliwrapper"
+	"github.com/shihanng/terraform-provider-installer/internal/cliwrapper/clioutput"
 	"github.com/shihanng/terraform-provider-installer/internal/models"
 	"github.com/shihanng/terraform-provider-installer/internal/system"
 	"github.com/shihanng/terraform-provider-installer/internal/versionfinders"
@@ -15,14 +16,15 @@ import (
 var _ versionfinders.VersionFinder = &DpkgVersionFinder{}
 
 type DpkgVersionFinder struct {
-	CliWrapper cliwrapper.CliWrapper
+	versionfinders.VersionFinderConfig
 }
 
-func NewDpkgVersionFinder() *DpkgVersionFinder {
-	const sudo = false
-	const program = "dpkg"
+const DefaultSudo = false
+const DefaultProgram = "dpkg"
+
+func NewDpkgVersionFinder(config versionfinders.VersionFinderConfig) *DpkgVersionFinder {
 	return &DpkgVersionFinder{
-		CliWrapper: cliwrapper.NewLocalCliWrapper(sudo, program),
+		VersionFinderConfig: config,
 	}
 }
 
@@ -56,11 +58,11 @@ func (i *DpkgVersionFinder) FindInstalled(ctx context.Context, options versionfi
 	return &info, out.Error
 }
 
-func (i *DpkgVersionFinder) DpkgList(ctx context.Context, name string) cliwrapper.CliOutput {
-	return i.CliWrapper.ExecuteCommand(ctx, "-L", name)
+func (i *DpkgVersionFinder) DpkgList(ctx context.Context, name string) clioutput.CliOutput {
+	return i.getCliWrapper().ExecuteCommand(ctx, "-L", name)
 }
 
-func (i *DpkgVersionFinder) DpkgContains(ctx context.Context, name string) (bool, cliwrapper.CliOutput) {
+func (i *DpkgVersionFinder) DpkgContains(ctx context.Context, name string) (bool, clioutput.CliOutput) {
 	out := i.DpkgList(ctx, name)
 	hasError := out.Error != nil
 	const notInstalledString = "is not installed"
@@ -70,6 +72,10 @@ func (i *DpkgVersionFinder) DpkgContains(ctx context.Context, name string) (bool
 	return !hasError, out
 }
 
-func (i *DpkgVersionFinder) DpkgStatus(ctx context.Context, name string) cliwrapper.CliOutput {
-	return i.CliWrapper.ExecuteCommand(ctx, "-s", name)
+func (i *DpkgVersionFinder) DpkgStatus(ctx context.Context, name string) clioutput.CliOutput {
+	return i.getCliWrapper().ExecuteCommand(ctx, "-s", name)
+}
+
+func (i *DpkgVersionFinder) getCliWrapper() cliwrapper.CliWrapper {
+	return cliwrapper.New(i, DefaultSudo, DefaultProgram)
 }

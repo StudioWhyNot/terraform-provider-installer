@@ -63,9 +63,9 @@ type DataSourceApt struct {
 }
 
 func NewDataSourceApt() datasource.DataSource {
-	return &DataSourceApt{
-		DataSource: NewDataSource[*DataSourceAptModel](apt.NewAptInstaller[*DataSourceAptModel]()),
-	}
+	resource := &DataSourceApt{}
+	resource.DataSource = NewDataSource[*DataSourceAptModel](apt.NewAptInstaller[*DataSourceAptModel](resource))
+	return resource
 }
 
 func (d *DataSourceApt) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {

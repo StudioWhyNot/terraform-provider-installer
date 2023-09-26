@@ -72,9 +72,9 @@ type ResourceBrew struct {
 }
 
 func NewResourceBrew() resource.Resource {
-	return &ResourceBrew{
-		Resource: NewResource[*ResourceBrewModel](brew.NewBrewInstaller[*ResourceBrewModel]()),
-	}
+	resource := &ResourceBrew{}
+	resource.Resource = NewResource[*ResourceBrewModel](brew.NewBrewInstaller[*ResourceBrewModel](resource))
+	return resource
 }
 
 func (r *ResourceBrew) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {

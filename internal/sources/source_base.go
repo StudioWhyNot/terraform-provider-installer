@@ -8,6 +8,7 @@ import (
 	"github.com/shihanng/terraform-provider-installer/internal/enums"
 	"github.com/shihanng/terraform-provider-installer/internal/installers"
 	"github.com/shihanng/terraform-provider-installer/internal/models"
+	"github.com/shihanng/terraform-provider-installer/internal/terraform/communicator"
 )
 
 type SourceData interface {
@@ -16,13 +17,19 @@ type SourceData interface {
 }
 
 type SourceBase[T any] struct {
-	Installer installers.Installer[T]
+	Installer    installers.Installer[T]
+	Communicator communicator.Communicator
 }
 
 func NewSourceBase[T any](installer installers.Installer[T]) *SourceBase[T] {
 	return &SourceBase[T]{
-		Installer: installer,
+		Installer:    installer,
+		Communicator: nil,
 	}
+}
+
+func (s *SourceBase[T]) GetCommunicator() communicator.Communicator {
+	return s.Communicator
 }
 
 func GetIDFromName(name types.String, installerType enums.InstallerType) types.String {

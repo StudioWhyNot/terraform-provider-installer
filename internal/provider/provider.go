@@ -8,9 +8,15 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/shihanng/terraform-provider-installer/internal/sources"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/datasources"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/resources"
+	"github.com/shihanng/terraform-provider-installer/internal/terraform/communicator"
+	"github.com/shihanng/terraform-provider-installer/internal/terraform/communicator/shared"
+	"github.com/shihanng/terraform-provider-installer/internal/terraformutils"
+	"github.com/shihanng/terraform-provider-installer/internal/xerrors"
 )
 
 // Ensure InstallerProvider satisfies various provider interfaces.
@@ -29,6 +35,7 @@ const ProviderName = "installer"
 
 // InstallerProviderModel describes the provider data model.
 type InstallerProviderModel struct {
+	terraformutils.RemoteConnectionInfo `tfsdk:"remote_connection"`
 }
 
 func (p *InstallerProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -37,11 +44,26 @@ func (p *InstallerProvider) Metadata(ctx context.Context, req provider.MetadataR
 }
 
 func (p *InstallerProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
-	// No provider-level schema.
+	resp.Schema = schema.Schema{
+		Blocks: map[string]schema.Block{
+			"remote_connection": terraformutils.ConvertConfigSchemaBlockToSchemaBlock(shared.ConnectionBlockSupersetSchema),
+		},
+	}
 }
 
 func (p *InstallerProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	// No provider-level configuration.
+	data, success := sources.TryGetData[*InstallerProviderModel](ctx, req.Config, &resp.Diagnostics)
+	if !success {
+		return
+	}
+	valMap := terraformutils.StructToCtyValueMap(data.RemoteConnectionInfo)
+	communicator, err := communicator.New(valMap)
+	if err != nil {
+		xerrors.AppendToDiagnostics(&resp.Diagnostics, err)
+		return
+	}
+	resp.DataSourceData = communicator
+	resp.ResourceData = communicator
 }
 
 func (p *InstallerProvider) Resources(ctx context.Context) []func() resource.Resource {

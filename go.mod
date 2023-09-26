@@ -13,6 +13,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.18.0
 	github.com/hashicorp/terraform-plugin-framework v1.3.4
 	github.com/hashicorp/terraform-plugin-log v0.9.0
+	github.com/iancoleman/strcase v0.3.0
 	github.com/masterzen/winrm v0.0.0-20220917170901-b07f6cb0598d
 	github.com/packer-community/winrmcp v0.0.0-20221126162354-6e900dd2c68f
 	github.com/xanzy/ssh-agent v0.3.3
