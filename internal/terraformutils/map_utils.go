@@ -9,9 +9,12 @@ import (
 	"github.com/zclconf/go-cty/cty"
 )
 
-func StructToCtyValueMap[T any](obj T) cty.Value {
+func StructToCtyValueMap[T any](obj *T) *cty.Value {
+	if obj == nil {
+		return nil
+	}
 	const metadataTag = "tfsdk"
-	objValue := reflect.ValueOf(obj)
+	objValue := reflect.ValueOf(*obj)
 	objType := objValue.Type()
 
 	result := make(map[string]cty.Value)
@@ -32,8 +35,8 @@ func StructToCtyValueMap[T any](obj T) cty.Value {
 
 		result[fieldName] = fieldValue
 	}
-
-	return cty.ObjectVal(result)
+	newVal := cty.ObjectVal(result)
+	return &newVal
 }
 
 // ConvertToCtyValue converts a reflect.Value to a cty.Value

@@ -1,6 +1,9 @@
 package terraformutils
 
-import "github.com/hashicorp/terraform-plugin-framework/types"
+import (
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/shihanng/terraform-provider-installer/internal/terraform/communicator"
+)
 
 type RemoteConnectionInfo struct {
 	Type           types.String `tfsdk:"type"`
@@ -36,4 +39,12 @@ type RemoteConnectionInfo struct {
 	Insecure types.Bool   `tfsdk:"insecure"`
 	NTLM     types.Bool   `tfsdk:"use_ntlm"`
 	CACert   types.String `tfsdk:"cacert"`
+}
+
+func MakeCommunicator(info *RemoteConnectionInfo) (communicator.Communicator, error) {
+	valMap := StructToCtyValueMap(info)
+	if valMap == nil {
+		return nil, nil
+	}
+	return communicator.New(*valMap)
 }

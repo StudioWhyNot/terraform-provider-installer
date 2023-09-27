@@ -15,6 +15,7 @@ import (
 	"github.com/shihanng/terraform-provider-installer/internal/sources"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/resources/defaults"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/schemastrings"
+	"github.com/shihanng/terraform-provider-installer/internal/terraformutils"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -24,15 +25,16 @@ var _ sources.SourceData = &ResourceScriptModel{}
 
 // ResourceScriptModel describes the resource data model.
 type ResourceScriptModel struct {
-	Id                  types.String `tfsdk:"id"`
-	Path                types.String `tfsdk:"path"`
-	InstallScript       types.String `tfsdk:"install_script"`
-	FindInstalledScript types.String `tfsdk:"find_installed_script"`
-	UninstallScript     types.String `tfsdk:"uninstall_script"`
-	DefaultArgs         types.List   `tfsdk:"default_args"`
-	AdditionalArgs      types.List   `tfsdk:"additional_args"`
-	Sudo                types.Bool   `tfsdk:"sudo"`
-	Shell               types.String `tfsdk:"shell"`
+	Id                                   types.String `tfsdk:"id"`
+	Path                                 types.String `tfsdk:"path"`
+	InstallScript                        types.String `tfsdk:"install_script"`
+	FindInstalledScript                  types.String `tfsdk:"find_installed_script"`
+	UninstallScript                      types.String `tfsdk:"uninstall_script"`
+	DefaultArgs                          types.List   `tfsdk:"default_args"`
+	AdditionalArgs                       types.List   `tfsdk:"additional_args"`
+	Sudo                                 types.Bool   `tfsdk:"sudo"`
+	Shell                                types.String `tfsdk:"shell"`
+	*terraformutils.RemoteConnectionInfo `tfsdk:"remote_connection"`
 }
 
 func (m *ResourceScriptModel) GetId() string {
@@ -84,6 +86,10 @@ func (m *ResourceScriptModel) Initialize() bool {
 	return !idString.IsNull()
 }
 
+func (m *ResourceScriptModel) GetRemoteConnectionInfo() *terraformutils.RemoteConnectionInfo {
+	return m.RemoteConnectionInfo
+}
+
 func (m *ResourceScriptModel) CopyFromTypedInstalledProgramInfo(installedInfo *models.TypedInstalledProgramInfo) {
 	m.Path = types.StringValue(installedInfo.Path)
 }
@@ -113,6 +119,9 @@ func (r *ResourceScript) Schema(ctx context.Context, req resource.SchemaRequest,
 			"default_args":          defaults.GetDefaultArgsSchema(schemastrings.ScriptDefaultArgsDescription, script.DefaultArg),
 			"sudo":                  defaults.GetSudoSchema(script.DefaultSudo),
 			"shell":                 defaults.GetShellSchema(schemastrings.ScriptShellDescription, script.DefaultProgram),
+		},
+		Blocks: map[string]schema.Block{
+			"remote_connection": terraformutils.GetRemoteConnectionBlockSchema(),
 		},
 	}
 }

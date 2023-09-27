@@ -15,6 +15,7 @@ import (
 	"github.com/shihanng/terraform-provider-installer/internal/sources"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/datasources/defaults"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/schemastrings"
+	"github.com/shihanng/terraform-provider-installer/internal/terraformutils"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -23,11 +24,12 @@ var _ sources.SourceData = &DataSourceBrewModel{}
 
 // DataSourceBrewModel describes the data source data model.
 type DataSourceBrewModel struct {
-	Name    types.String `tfsdk:"name"`
-	Version types.String `tfsdk:"version"`
-	Path    types.String `tfsdk:"path"`
-	Sudo    types.Bool   `tfsdk:"sudo"`
-	Cask    types.Bool   `tfsdk:"cask"`
+	Name                                 types.String `tfsdk:"name"`
+	Version                              types.String `tfsdk:"version"`
+	Path                                 types.String `tfsdk:"path"`
+	Sudo                                 types.Bool   `tfsdk:"sudo"`
+	Cask                                 types.Bool   `tfsdk:"cask"`
+	*terraformutils.RemoteConnectionInfo `tfsdk:"remote_connection"`
 }
 
 func (m *DataSourceBrewModel) GetSudo() bool {
@@ -52,6 +54,10 @@ func (m *DataSourceBrewModel) GetCask() bool {
 
 func (m *DataSourceBrewModel) Initialize() bool {
 	return !m.Name.IsNull()
+}
+
+func (m *DataSourceBrewModel) GetRemoteConnectionInfo() *terraformutils.RemoteConnectionInfo {
+	return m.RemoteConnectionInfo
 }
 
 func (m *DataSourceBrewModel) CopyFromTypedInstalledProgramInfo(installedInfo *models.TypedInstalledProgramInfo) {
@@ -81,6 +87,9 @@ func (d *DataSourceBrew) Schema(ctx context.Context, req datasource.SchemaReques
 			"path":    defaults.GetPathSchema(schemastrings.BrewPathDescription),
 			"sudo":    defaults.GetSudoSchema(),
 			"cask":    defaults.GetCaskSchema(),
+		},
+		Blocks: map[string]schema.Block{
+			"remote_connection": terraformutils.GetRemoteConnectionBlockSchema(),
 		},
 	}
 }

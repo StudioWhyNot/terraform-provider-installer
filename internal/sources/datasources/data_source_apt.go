@@ -15,6 +15,7 @@ import (
 	"github.com/shihanng/terraform-provider-installer/internal/sources"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/datasources/defaults"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/schemastrings"
+	"github.com/shihanng/terraform-provider-installer/internal/terraformutils"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -23,10 +24,11 @@ var _ sources.SourceData = &DataSourceAptModel{}
 
 // DataSourceAptModel describes the data source data model.
 type DataSourceAptModel struct {
-	Name    types.String `tfsdk:"name"`
-	Version types.String `tfsdk:"version"`
-	Path    types.String `tfsdk:"path"`
-	Sudo    types.Bool   `tfsdk:"sudo"`
+	Name                                 types.String `tfsdk:"name"`
+	Version                              types.String `tfsdk:"version"`
+	Path                                 types.String `tfsdk:"path"`
+	Sudo                                 types.Bool   `tfsdk:"sudo"`
+	*terraformutils.RemoteConnectionInfo `tfsdk:"remote_connection"`
 }
 
 func (m *DataSourceAptModel) GetSudo() bool {
@@ -47,6 +49,10 @@ func (m *DataSourceAptModel) GetVersion() *version.Version {
 
 func (m *DataSourceAptModel) Initialize() bool {
 	return !m.Name.IsNull()
+}
+
+func (m *DataSourceAptModel) GetRemoteConnectionInfo() *terraformutils.RemoteConnectionInfo {
+	return m.RemoteConnectionInfo
 }
 
 func (m *DataSourceAptModel) CopyFromTypedInstalledProgramInfo(installedInfo *models.TypedInstalledProgramInfo) {
@@ -75,6 +81,9 @@ func (d *DataSourceApt) Schema(ctx context.Context, req datasource.SchemaRequest
 			"version": defaults.GetVersionSchema(schemastrings.AptVersionDescription),
 			"path":    defaults.GetPathSchema(schemastrings.AptPathDescription),
 			"sudo":    defaults.GetSudoSchema(),
+		},
+		Blocks: map[string]schema.Block{
+			"remote_connection": terraformutils.GetRemoteConnectionBlockSchema(),
 		},
 	}
 }

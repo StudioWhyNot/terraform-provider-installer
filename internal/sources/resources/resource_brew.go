@@ -16,6 +16,7 @@ import (
 	"github.com/shihanng/terraform-provider-installer/internal/sources"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/resources/defaults"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/schemastrings"
+	"github.com/shihanng/terraform-provider-installer/internal/terraformutils"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -25,12 +26,13 @@ var _ sources.SourceData = &ResourceBrewModel{}
 
 // ResourceBrewModel describes the resource data model.
 type ResourceBrewModel struct {
-	Id      types.String `tfsdk:"id"`
-	Name    types.String `tfsdk:"name"`
-	Version types.String `tfsdk:"version"`
-	Path    types.String `tfsdk:"path"`
-	Sudo    types.Bool   `tfsdk:"sudo"`
-	Cask    types.Bool   `tfsdk:"sudo"`
+	Id                                   types.String `tfsdk:"id"`
+	Name                                 types.String `tfsdk:"name"`
+	Version                              types.String `tfsdk:"version"`
+	Path                                 types.String `tfsdk:"path"`
+	Sudo                                 types.Bool   `tfsdk:"sudo"`
+	Cask                                 types.Bool   `tfsdk:"sudo"`
+	*terraformutils.RemoteConnectionInfo `tfsdk:"remote_connection"`
 }
 
 func (m *ResourceBrewModel) GetSudo() bool {
@@ -56,6 +58,10 @@ func (m *ResourceBrewModel) GetCask() bool {
 func (m *ResourceBrewModel) Initialize() bool {
 	m.Id = sources.GetIDFromNameAndVersion(brew.VersionSeperator, m.Name, m.Version, enums.InstallerBrew)
 	return !m.Name.IsNull()
+}
+
+func (m *ResourceBrewModel) GetRemoteConnectionInfo() *terraformutils.RemoteConnectionInfo {
+	return m.RemoteConnectionInfo
 }
 
 func (m *ResourceBrewModel) CopyFromTypedInstalledProgramInfo(installedInfo *models.TypedInstalledProgramInfo) {
@@ -88,6 +94,9 @@ func (r *ResourceBrew) Schema(ctx context.Context, req resource.SchemaRequest, r
 			"path":    defaults.GetPathSchema(schemastrings.BrewPathDescription),
 			"sudo":    defaults.GetSudoSchema(brew.DefaultSudo),
 			"cask":    defaults.GetCaskSchema(schemastrings.BrewCaskDescription, brew.DefaultCask),
+		},
+		Blocks: map[string]schema.Block{
+			"remote_connection": terraformutils.GetRemoteConnectionBlockSchema(),
 		},
 	}
 }

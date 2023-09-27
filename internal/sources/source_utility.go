@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/shihanng/terraform-provider-installer/internal/terraformutils"
 	"github.com/shihanng/terraform-provider-installer/internal/xerrors"
 )
 
@@ -27,6 +28,7 @@ func SetStateData(ctx context.Context, state *tfsdk.State, diagnostics *diag.Dia
 }
 
 func FillAndSetStateData[T SourceData](source *SourceBase[T], ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics, data T) {
+	SetCommunicator(source, data.GetRemoteConnectionInfo(), diagnostics)
 	err := source.TryConnect()
 	if err != nil {
 		xerrors.AppendToDiagnostics(diagnostics, err)
@@ -52,6 +54,7 @@ func DefaultCreate[T SourceData](source *SourceBase[T], plan tfsdk.Plan, state *
 		return false
 	}
 
+	SetCommunicator(source, data.GetRemoteConnectionInfo(), diagnostics)
 	err := source.TryConnect()
 	if err != nil {
 		xerrors.AppendToDiagnostics(diagnostics, err)
@@ -75,6 +78,18 @@ func DefaultCreate[T SourceData](source *SourceBase[T], plan tfsdk.Plan, state *
 	tflog.Trace(ctx, "Created resource of type: "+source.Installer.GetInstallerType().String())
 	FillAndSetStateData(source, ctx, state, diagnostics, data)
 	return true
+}
+
+func DefaultConfigure[T SourceData](source *SourceBase[T], providerData any, diagnostics *diag.Diagnostics) {
+	if providerData == nil {
+		return
+	}
+	connInfo := providerData.(*terraformutils.RemoteConnectionInfo)
+	communicator, err := terraformutils.MakeCommunicator(connInfo)
+	if err != nil {
+		xerrors.AppendToDiagnostics(diagnostics, err)
+	}
+	source.Communicator = communicator
 }
 
 func DefaultRead[T SourceData](source *SourceBase[T], state *tfsdk.State, ctx context.Context, diagnostics *diag.Diagnostics) bool {
@@ -107,6 +122,7 @@ func DefaultDelete[T SourceData](source *SourceBase[T], state *tfsdk.State, ctx 
 		return false
 	}
 
+	SetCommunicator(source, data.GetRemoteConnectionInfo(), diagnostics)
 	err := source.TryConnect()
 	if err != nil {
 		xerrors.AppendToDiagnostics(diagnostics, err)
@@ -123,4 +139,15 @@ func DefaultDelete[T SourceData](source *SourceBase[T], state *tfsdk.State, ctx 
 		xerrors.AppendToDiagnostics(diagnostics, err)
 	}
 	return true
+}
+
+func SetCommunicator[T SourceData](source *SourceBase[T], connInfo *terraformutils.RemoteConnectionInfo, diagnostics *diag.Diagnostics) {
+	if connInfo == nil {
+		return
+	}
+	communicator, err := terraformutils.MakeCommunicator(connInfo)
+	if err != nil {
+		xerrors.AppendToDiagnostics(diagnostics, err)
+	}
+	source.Communicator = communicator
 }

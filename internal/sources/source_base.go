@@ -10,11 +10,13 @@ import (
 	"github.com/shihanng/terraform-provider-installer/internal/models"
 	"github.com/shihanng/terraform-provider-installer/internal/system"
 	"github.com/shihanng/terraform-provider-installer/internal/terraform/communicator"
+	"github.com/shihanng/terraform-provider-installer/internal/terraformutils"
 )
 
 type SourceData interface {
 	Initialize() bool
 	CopyFromTypedInstalledProgramInfo(programInfo *models.TypedInstalledProgramInfo)
+	GetRemoteConnectionInfo() *terraformutils.RemoteConnectionInfo
 }
 
 type SourceBase[T any] struct {

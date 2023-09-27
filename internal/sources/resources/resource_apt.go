@@ -16,6 +16,7 @@ import (
 	"github.com/shihanng/terraform-provider-installer/internal/sources"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/resources/defaults"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/schemastrings"
+	"github.com/shihanng/terraform-provider-installer/internal/terraformutils"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
@@ -25,11 +26,12 @@ var _ sources.SourceData = &ResourceAptModel{}
 
 // ResourceAptModel describes the resource data model.
 type ResourceAptModel struct {
-	Id      types.String `tfsdk:"id"`
-	Name    types.String `tfsdk:"name"`
-	Version types.String `tfsdk:"version"`
-	Path    types.String `tfsdk:"path"`
-	Sudo    types.Bool   `tfsdk:"sudo"`
+	Id                                   types.String `tfsdk:"id"`
+	Name                                 types.String `tfsdk:"name"`
+	Version                              types.String `tfsdk:"version"`
+	Path                                 types.String `tfsdk:"path"`
+	Sudo                                 types.Bool   `tfsdk:"sudo"`
+	*terraformutils.RemoteConnectionInfo `tfsdk:"remote_connection"`
 }
 
 func (m *ResourceAptModel) GetSudo() bool {
@@ -51,6 +53,10 @@ func (m *ResourceAptModel) GetVersion() *version.Version {
 func (m *ResourceAptModel) Initialize() bool {
 	m.Id = sources.GetIDFromNameAndVersion(apt.VersionSeperator, m.Name, m.Version, enums.InstallerApt)
 	return !m.Name.IsNull()
+}
+
+func (m *ResourceAptModel) GetRemoteConnectionInfo() *terraformutils.RemoteConnectionInfo {
+	return m.RemoteConnectionInfo
 }
 
 func (m *ResourceAptModel) CopyFromTypedInstalledProgramInfo(installedInfo *models.TypedInstalledProgramInfo) {
@@ -82,6 +88,9 @@ func (r *ResourceApt) Schema(ctx context.Context, req resource.SchemaRequest, re
 			"version": defaults.GetVersionSchema(schemastrings.AptVersionDescription),
 			"path":    defaults.GetPathSchema(schemastrings.AptPathDescription),
 			"sudo":    defaults.GetSudoSchema(apt.DefaultSudo),
+		},
+		Blocks: map[string]schema.Block{
+			"remote_connection": terraformutils.GetRemoteConnectionBlockSchema(),
 		},
 	}
 }

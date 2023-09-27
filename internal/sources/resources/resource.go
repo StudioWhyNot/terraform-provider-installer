@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/shihanng/terraform-provider-installer/internal/installers"
 	"github.com/shihanng/terraform-provider-installer/internal/sources"
-	"github.com/shihanng/terraform-provider-installer/internal/terraform/communicator"
 )
 
 // Resource[T] defines the generic data source implementation.
@@ -26,9 +25,7 @@ func (d *Resource[T]) Metadata(ctx context.Context, req resource.MetadataRequest
 }
 
 func (r *Resource[T]) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	if req.ProviderData != nil {
-		r.Communicator = req.ProviderData.(communicator.Communicator)
-	}
+	sources.DefaultConfigure[T](&r.SourceBase, req.ProviderData, &resp.Diagnostics)
 }
 
 func (r *Resource[T]) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
