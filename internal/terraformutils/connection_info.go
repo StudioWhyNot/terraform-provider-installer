@@ -41,6 +41,15 @@ type RemoteConnectionInfo struct {
 	CACert   types.String `tfsdk:"cacert"`
 }
 
+const userConnectionSeperator = "@"
+
+func (r *RemoteConnectionInfo) GetConnectionName() string {
+	if r == nil || r.User.IsNull() || r.Host.IsNull() {
+		return ""
+	}
+	return r.User.ValueString() + userConnectionSeperator + r.Host.ValueString()
+}
+
 func MakeCommunicator(info *RemoteConnectionInfo) (communicator.Communicator, error) {
 	valMap := StructToCtyValueMap(info)
 	if valMap == nil {

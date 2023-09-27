@@ -1,14 +1,21 @@
 package system
 
-import "log"
+import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+)
 
 type DefaultLogger struct {
+	Context context.Context
 }
 
 func (o DefaultLogger) Output(val string) {
-	log.Println(val)
+	tflog.Info(o.Context, val)
 }
 
-func NewDefaultLogger() DefaultLogger {
-	return DefaultLogger{}
+func NewDefaultLogger(context context.Context) DefaultLogger {
+	return DefaultLogger{
+		Context: context,
+	}
 }

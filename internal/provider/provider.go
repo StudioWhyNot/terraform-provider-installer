@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/shihanng/terraform-provider-installer/internal/provider/defaults"
 	"github.com/shihanng/terraform-provider-installer/internal/sources"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/datasources"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/resources"
@@ -43,7 +44,7 @@ func (p *InstallerProvider) Metadata(ctx context.Context, req provider.MetadataR
 func (p *InstallerProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Blocks: map[string]schema.Block{
-			"remote_connection": terraformutils.GetRemoteConnectionBlockSchema(),
+			"remote_connection": defaults.GetRemoteConnectionBlockSchema(),
 		},
 	}
 }
@@ -61,6 +62,8 @@ func (p *InstallerProvider) Resources(ctx context.Context) []func() resource.Res
 	return []func() resource.Resource{
 		resources.NewResourceApt,
 		resources.NewResourceScript,
+		//TODO: Brew
+		//TODO: Asdf
 	}
 }
 

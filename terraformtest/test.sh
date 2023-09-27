@@ -3,6 +3,7 @@
 export TF_CLI_CONFIG_FILE=$(pwd)/../.terraformrc
 export TF_LOG_PROVIDER=""
 export TF_LOG="WARN"
+#export TF_LOG="INFO"
 # Set default value for input
 input=${1:-"up"}
 

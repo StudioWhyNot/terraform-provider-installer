@@ -44,3 +44,10 @@ func GetSudoSchema() schema.BoolAttribute {
 func GetCaskSchema() schema.BoolAttribute {
 	return getDefaultBoolSchema(schemastrings.BrewCaskDescription, true)
 }
+
+func GetConnectionNameSchema() schema.StringAttribute {
+	schma := getDefaultStringSchema(schemastrings.DefaultConnectionNameDescription, false)
+	schma.Required = false
+	schma.Computed = true
+	return schma
+}

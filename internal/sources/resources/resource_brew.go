@@ -65,6 +65,12 @@ func (m *ResourceBrewModel) GetRemoteConnectionInfo() *terraformutils.RemoteConn
 }
 
 func (m *ResourceBrewModel) CopyFromTypedInstalledProgramInfo(installedInfo *models.TypedInstalledProgramInfo) {
+	if installedInfo == nil {
+		m.Name = types.StringNull()
+		m.Path = types.StringNull()
+		m.Version = types.StringNull()
+		return
+	}
 	m.Name = types.StringValue(installedInfo.Name)
 	m.Path = types.StringValue(installedInfo.Path)
 	if installedInfo.Version != nil {
@@ -96,7 +102,7 @@ func (r *ResourceBrew) Schema(ctx context.Context, req resource.SchemaRequest, r
 			"cask":    defaults.GetCaskSchema(schemastrings.BrewCaskDescription, brew.DefaultCask),
 		},
 		Blocks: map[string]schema.Block{
-			"remote_connection": terraformutils.GetRemoteConnectionBlockSchema(),
+			"remote_connection": defaults.GetRemoteConnectionBlockSchema(),
 		},
 	}
 }

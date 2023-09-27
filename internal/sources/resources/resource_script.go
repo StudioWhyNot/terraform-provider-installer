@@ -91,6 +91,10 @@ func (m *ResourceScriptModel) GetRemoteConnectionInfo() *terraformutils.RemoteCo
 }
 
 func (m *ResourceScriptModel) CopyFromTypedInstalledProgramInfo(installedInfo *models.TypedInstalledProgramInfo) {
+	if installedInfo == nil {
+		m.Path = types.StringNull()
+		return
+	}
 	m.Path = types.StringValue(installedInfo.Path)
 }
 
@@ -121,7 +125,7 @@ func (r *ResourceScript) Schema(ctx context.Context, req resource.SchemaRequest,
 			"shell":                 defaults.GetShellSchema(schemastrings.ScriptShellDescription, script.DefaultProgram),
 		},
 		Blocks: map[string]schema.Block{
-			"remote_connection": terraformutils.GetRemoteConnectionBlockSchema(),
+			"remote_connection": defaults.GetRemoteConnectionBlockSchema(),
 		},
 	}
 }

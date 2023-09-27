@@ -60,6 +60,12 @@ func (m *ResourceAptModel) GetRemoteConnectionInfo() *terraformutils.RemoteConne
 }
 
 func (m *ResourceAptModel) CopyFromTypedInstalledProgramInfo(installedInfo *models.TypedInstalledProgramInfo) {
+	if installedInfo == nil {
+		m.Name = types.StringNull()
+		m.Path = types.StringNull()
+		m.Version = types.StringNull()
+		return
+	}
 	m.Name = types.StringValue(installedInfo.Name)
 	m.Path = types.StringValue(installedInfo.Path)
 	if installedInfo.Version != nil {
@@ -90,7 +96,7 @@ func (r *ResourceApt) Schema(ctx context.Context, req resource.SchemaRequest, re
 			"sudo":    defaults.GetSudoSchema(apt.DefaultSudo),
 		},
 		Blocks: map[string]schema.Block{
-			"remote_connection": terraformutils.GetRemoteConnectionBlockSchema(),
+			"remote_connection": defaults.GetRemoteConnectionBlockSchema(),
 		},
 	}
 }

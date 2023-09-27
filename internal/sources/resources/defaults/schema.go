@@ -7,11 +7,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/shihanng/terraform-provider-installer/internal/provider/defaults"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/schemastrings"
+	"github.com/shihanng/terraform-provider-installer/internal/terraform/communicator/shared"
+	"github.com/shihanng/terraform-provider-installer/internal/terraform/configs/configschema"
+	"github.com/shihanng/terraform-provider-installer/internal/terraformutils"
 )
 
 func getDefaultStringSchema(markdownDescription string, optional bool, requiresReplace bool) schema.StringAttribute {
@@ -124,4 +129,30 @@ func GetShellSchema(markdownDescription string, defaultVal string) schema.String
 	schma.Computed = true
 	schma.Default = stringdefault.StaticString(defaultVal)
 	return schma
+}
+
+func GetConnectionNameSchema() schema.StringAttribute {
+	schma := getDefaultStringSchema(schemastrings.DefaultConnectionNameDescription, false, true)
+	schma.Required = false
+	schma.Computed = true
+	return schma
+}
+
+func GetRemoteConnectionBlockSchema() schema.SingleNestedBlock {
+	block := convertConfigSchemaBlockToSchemaBlock(shared.ConnectionBlockSupersetSchema)
+	block.MarkdownDescription = terraformutils.RemoteConnectionBlockDescription
+	return block
+}
+
+func convertConfigSchemaBlockToSchemaBlock(config *configschema.Block) schema.SingleNestedBlock {
+	block := schema.SingleNestedBlock{
+		Attributes: map[string]schema.Attribute{},
+		PlanModifiers: []planmodifier.Object{
+			objectplanmodifier.RequiresReplace(),
+		},
+	}
+	for name, attr := range config.Attributes {
+		block.Attributes[name] = defaults.ConvertConfigSchemaAttrToSchemaAttr(attr, name)
+	}
+	return block
 }

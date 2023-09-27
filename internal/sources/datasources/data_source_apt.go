@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/shihanng/terraform-provider-installer/internal/installers/apt"
 	"github.com/shihanng/terraform-provider-installer/internal/models"
+	providerdefaults "github.com/shihanng/terraform-provider-installer/internal/provider/defaults"
 	"github.com/shihanng/terraform-provider-installer/internal/sources"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/datasources/defaults"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/schemastrings"
@@ -56,6 +57,12 @@ func (m *DataSourceAptModel) GetRemoteConnectionInfo() *terraformutils.RemoteCon
 }
 
 func (m *DataSourceAptModel) CopyFromTypedInstalledProgramInfo(installedInfo *models.TypedInstalledProgramInfo) {
+	if installedInfo == nil {
+		m.Name = types.StringNull()
+		m.Path = types.StringNull()
+		m.Version = types.StringNull()
+		return
+	}
 	m.Name = types.StringValue(installedInfo.Name)
 	m.Path = types.StringValue(installedInfo.Path)
 	if installedInfo.Version != nil {
@@ -83,7 +90,7 @@ func (d *DataSourceApt) Schema(ctx context.Context, req datasource.SchemaRequest
 			"sudo":    defaults.GetSudoSchema(),
 		},
 		Blocks: map[string]schema.Block{
-			"remote_connection": terraformutils.GetRemoteConnectionBlockSchema(),
+			"remote_connection": providerdefaults.GetRemoteConnectionBlockSchema(),
 		},
 	}
 }

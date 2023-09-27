@@ -35,11 +35,12 @@ func (s *SourceBase[T]) GetCommunicator() communicator.Communicator {
 	return s.Communicator
 }
 
-func (s *SourceBase[T]) TryConnect() error {
+func (s *SourceBase[T]) TryConnect(context context.Context) error {
 	if s.Communicator == nil {
 		return nil
 	}
-	return s.Communicator.Connect(system.NewDefaultLogger())
+
+	return s.Communicator.Connect(system.NewDefaultLogger(context))
 }
 
 func (s *SourceBase[T]) TryDisconnect() error {
