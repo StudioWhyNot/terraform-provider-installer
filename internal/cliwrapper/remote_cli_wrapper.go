@@ -32,15 +32,18 @@ func NewRemoteCliWrapper(communicator communicator.Communicator, sudo bool, prog
 // ExecuteCommand executes a command with the given parameters, taking into consideration whether or not it should be sudo.
 func (c RemoteCliWrapper) ExecuteCommand(ctx context.Context, params ...string) clioutput.CliOutput {
 	programName, params := GetProgramAndParams(c.Sudo, c.ProgramName, params...)
-	buffer := bytes.Buffer{}
+	outBuff := bytes.Buffer{}
 	errBuff := bytes.Buffer{}
-	cmd := getCommand(&buffer, &errBuff, programName, params...)
+	cmd := getCommand(&outBuff, &errBuff, programName, params...)
 	err := c.Communicator.Start(cmd)
-	cmd.Wait()
-	// Print the combined output
-	strout := buffer.String()
 	if err != nil {
-		return clioutput.CliOutput{CombinedOutput: strout, Error: errors.Wrap(errors.WithDetail(err, strout), cmd.Command)}
+		return clioutput.CliOutput{Error: errors.Wrap(errors.WithDetail(err, "failed to start command"), cmd.Command)}
+	}
+	err = cmd.Wait()
+	// Print the combined output
+	strout := outBuff.String()
+	if err != nil {
+		return clioutput.CliOutput{CombinedOutput: strout, Error: errors.Wrap(errors.WithDetail(err, errBuff.String()), cmd.Command)}
 	}
 
 	return clioutput.CliOutput{CombinedOutput: strout, Error: err}

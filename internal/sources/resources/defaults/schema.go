@@ -82,7 +82,7 @@ func GetVersionSchema(markdownDescription string) schema.StringAttribute {
 }
 
 func GetSudoSchema(defaultVal bool) schema.BoolAttribute {
-	return getDefaultBoolSchema(schemastrings.DefaultSudoDescription, defaultVal, false)
+	return getDefaultBoolSchema(schemastrings.DefaultSudoDescription, defaultVal, true)
 }
 
 func GetCaskSchema(markdownDescription string, defaultVal bool) schema.BoolAttribute {
