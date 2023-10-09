@@ -39,6 +39,10 @@ func (m *ResourceBrewModel) GetSudo() bool {
 	return m.Sudo.ValueBool()
 }
 
+func (m *ResourceBrewModel) GetEnvironment() map[string]string {
+	return nil
+}
+
 func (m *ResourceBrewModel) GetNamedVersion() models.NamedVersion {
 	return models.NewNamedVersionFromStrings(brew.VersionSeperator, m.Name.ValueString(), m.Version.ValueString())
 }

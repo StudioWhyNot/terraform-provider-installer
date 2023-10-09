@@ -60,7 +60,7 @@ func (i *BrewInstaller[T]) Uninstall(ctx context.Context, options T) (bool, erro
 		// Not installed, no error.
 		return false, nil
 	}
-	wrapper := i.GetCliWrapper(options.GetSudo())
+	wrapper := i.GetCliWrapper(options)
 	out := brewUninstall(ctx, wrapper, options.GetName(), options.GetVersion())
 	return out.Error == nil, out.Error
 }
@@ -73,8 +73,8 @@ func (i *BrewInstaller[T]) getBrewCommand(options T, command string, withJSONV2 
 	return args
 }
 
-func (i *BrewInstaller[T]) GetCliWrapper(sudo bool) cliwrapper.CliWrapper {
-	return cliwrapper.New(i, sudo, DefaultProgram)
+func (i *BrewInstaller[T]) GetCliWrapper(options T) cliwrapper.CliWrapper {
+	return cliwrapper.New(i, options.GetSudo(), options.GetEnvironment(), DefaultProgram)
 }
 
 type brewOptions int

@@ -11,6 +11,7 @@ import (
 	"github.com/shihanng/terraform-provider-installer/internal/enums"
 	"github.com/shihanng/terraform-provider-installer/internal/installers"
 	"github.com/shihanng/terraform-provider-installer/internal/models"
+	"github.com/shihanng/terraform-provider-installer/internal/system"
 )
 
 type ScriptInstallerOptions interface {
@@ -96,14 +97,16 @@ func (i *ScriptInstaller[T]) Uninstall(ctx context.Context, options T) (bool, er
 }
 
 func (i *ScriptInstaller[T]) executeScript(ctx context.Context, options T, script string) clioutput.CliOutput {
-	wrapper := i.GetCliWrapper(options.GetSudo(), options.GetShell())
-	args := append(options.GetDefaultArgs(ctx), script)
+	// Use single quote to wrap the script to avoid shell expansion.
+	const wrapperCharacter = "'"
+	wrapper := i.GetCliWrapper(options)
+	args := append(options.GetDefaultArgs(ctx), system.WrapString(script, wrapperCharacter))
 	args = append(args, options.GetAdditionalArgs(ctx)...)
 	return wrapper.ExecuteCommand(ctx, args...)
 }
 
-func (i *ScriptInstaller[T]) GetCliWrapper(sudo bool, program string) cliwrapper.CliWrapper {
-	return cliwrapper.New(i, sudo, DefaultProgram)
+func (i *ScriptInstaller[T]) GetCliWrapper(options T) cliwrapper.CliWrapper {
+	return cliwrapper.New(i, options.GetSudo(), options.GetEnvironment(), options.GetShell())
 }
 
 func IsInstalled(path string) (bool, error) {

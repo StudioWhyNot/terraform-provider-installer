@@ -77,5 +77,5 @@ func (i *DpkgVersionFinder) DpkgStatus(ctx context.Context, name string) clioutp
 }
 
 func (i *DpkgVersionFinder) getCliWrapper() cliwrapper.CliWrapper {
-	return cliwrapper.New(i, DefaultSudo, DefaultProgram)
+	return cliwrapper.New(i, DefaultSudo, nil, DefaultProgram)
 }

@@ -38,6 +38,10 @@ func (m *ResourceAptModel) GetSudo() bool {
 	return m.Sudo.ValueBool()
 }
 
+func (m *ResourceAptModel) GetEnvironment() map[string]string {
+	return nil
+}
+
 func (m *ResourceAptModel) GetNamedVersion() models.NamedVersion {
 	return models.NewNamedVersionFromStrings(apt.VersionSeperator, m.Name.ValueString(), m.Version.ValueString())
 }

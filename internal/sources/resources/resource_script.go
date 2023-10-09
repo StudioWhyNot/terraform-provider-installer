@@ -58,19 +58,19 @@ func (m *ResourceScriptModel) GetUninstallScript() string {
 }
 
 func (m *ResourceScriptModel) GetAdditionalArgs(ctx context.Context) []string {
-	var args []string
-	m.AdditionalArgs.ElementsAs(ctx, args, false)
-	return args
+	return sources.ListValueToList[string](ctx, &m.AdditionalArgs)
 }
 
 func (m *ResourceScriptModel) GetDefaultArgs(ctx context.Context) []string {
-	var args []string
-	m.DefaultArgs.ElementsAs(ctx, args, false)
-	return args
+	return sources.ListValueToList[string](ctx, &m.DefaultArgs)
 }
 
 func (m *ResourceScriptModel) GetSudo() bool {
 	return m.Sudo.ValueBool()
+}
+
+func (m *ResourceScriptModel) GetEnvironment() map[string]string {
+	return nil
 }
 
 func (m *ResourceScriptModel) GetShell() string {

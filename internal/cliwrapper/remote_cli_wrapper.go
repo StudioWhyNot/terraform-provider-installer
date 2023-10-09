@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/cockroachdb/errors"
+	"github.com/shihanng/terraform-provider-installer/internal/cliwrapper/clibuilder"
 	"github.com/shihanng/terraform-provider-installer/internal/cliwrapper/clioutput"
 	"github.com/shihanng/terraform-provider-installer/internal/terraform/communicator"
 	"github.com/shihanng/terraform-provider-installer/internal/terraform/communicator/remote"
@@ -15,26 +16,24 @@ var _ CliWrapper = RemoteCliWrapper{}
 
 // The base struct for all RemoteCliWrappers, that wrap the local CLI.
 type RemoteCliWrapper struct {
-	Sudo         bool
-	ProgramName  string
+	clibuilder.CliBuilder
 	Communicator communicator.Communicator
 }
 
 // Default constructor for RemoteCliWrapper.
-func NewRemoteCliWrapper(communicator communicator.Communicator, sudo bool, programName string) RemoteCliWrapper {
+func NewRemoteCliWrapper(communicator communicator.Communicator, sudo bool, environment map[string]string, programName string) RemoteCliWrapper {
 	return RemoteCliWrapper{
-		Sudo:         sudo,
-		ProgramName:  programName,
+		CliBuilder:   clibuilder.NewCliBuilder(sudo, environment, programName),
 		Communicator: communicator,
 	}
 }
 
 // ExecuteCommand executes a command with the given parameters, taking into consideration whether or not it should be sudo.
 func (c RemoteCliWrapper) ExecuteCommand(ctx context.Context, params ...string) clioutput.CliOutput {
-	programName, params := GetProgramAndParams(c.Sudo, c.ProgramName, params...)
+	params = c.GetProgramAndParamsWithEnvironment(params...)
 	outBuff := bytes.Buffer{}
 	errBuff := bytes.Buffer{}
-	cmd := getCommand(&outBuff, &errBuff, programName, params...)
+	cmd := getCommand(&outBuff, &errBuff, params...)
 	err := c.Communicator.Start(cmd)
 	if err != nil {
 		return clioutput.CliOutput{Error: errors.Wrap(errors.WithDetail(err, "failed to start command"), cmd.Command)}
@@ -49,8 +48,7 @@ func (c RemoteCliWrapper) ExecuteCommand(ctx context.Context, params ...string) 
 	return clioutput.CliOutput{CombinedOutput: strout, Error: err}
 }
 
-func getCommand(output *bytes.Buffer, err *bytes.Buffer, programName string, params ...string) *remote.Cmd {
-	params = append([]string{programName}, params...)
+func getCommand(output *bytes.Buffer, err *bytes.Buffer, params ...string) *remote.Cmd {
 	joined := strings.Join(params, clioutput.CliParamSeperator)
 	return &remote.Cmd{
 		Command: joined,

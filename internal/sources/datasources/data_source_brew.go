@@ -37,6 +37,10 @@ func (m *DataSourceBrewModel) GetSudo() bool {
 	return m.Sudo.ValueBool()
 }
 
+func (m *DataSourceBrewModel) GetEnvironment() map[string]string {
+	return nil
+}
+
 func (m *DataSourceBrewModel) GetNamedVersion() models.NamedVersion {
 	return models.NewNamedVersionFromStrings(brew.VersionSeperator, m.Name.ValueString(), m.Version.ValueString())
 }

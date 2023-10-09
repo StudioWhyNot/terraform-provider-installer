@@ -10,6 +10,7 @@ import (
 
 type InstallerOptions interface {
 	GetSudo() bool
+	GetEnvironment() map[string]string
 }
 
 // The basic interface for all installers.

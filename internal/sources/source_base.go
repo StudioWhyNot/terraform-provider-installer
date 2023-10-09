@@ -20,8 +20,9 @@ type SourceData interface {
 }
 
 type SourceBase[T any] struct {
-	Installer    installers.Installer[T]
-	Communicator communicator.Communicator
+	Installer      installers.Installer[T]
+	Communicator   communicator.Communicator
+	ConnectionInfo *terraformutils.RemoteConnectionInfo
 }
 
 func NewSourceBase[T any](installer installers.Installer[T]) *SourceBase[T] {
@@ -39,7 +40,10 @@ func (s *SourceBase[T]) TryConnect(context context.Context) error {
 	if s.Communicator == nil {
 		return nil
 	}
-
+	err := s.ConnectionInfo.WaitForHost()
+	if err != nil {
+		return err
+	}
 	return s.Communicator.Connect(system.NewDefaultLogger(context))
 }
 

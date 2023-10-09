@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/shihanng/terraform-provider-installer/internal/terraformutils"
 	"github.com/shihanng/terraform-provider-installer/internal/xerrors"
@@ -144,6 +145,7 @@ func SetCommunicatorFromData[T SourceData](source *SourceBase[T], data T, diagno
 }
 
 func SetCommunicator[T SourceData](source *SourceBase[T], connInfo *terraformutils.RemoteConnectionInfo, diagnostics *diag.Diagnostics) {
+	source.ConnectionInfo = connInfo
 	if connInfo == nil {
 		return
 	}
@@ -152,4 +154,14 @@ func SetCommunicator[T SourceData](source *SourceBase[T], connInfo *terraformuti
 		xerrors.AppendToDiagnostics(diagnostics, err)
 	}
 	source.Communicator = communicator
+}
+
+func ListValueToList[T any](ctx context.Context, list *basetypes.ListValue) []T {
+	elems := list.Elements()
+	args := make([]T, len(elems))
+	for index, elem := range elems {
+		val, _ := elem.ToTerraformValue(ctx)
+		val.As(&args[index])
+	}
+	return args
 }
