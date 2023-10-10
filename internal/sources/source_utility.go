@@ -165,3 +165,15 @@ func ListValueToList[T any](ctx context.Context, list *basetypes.ListValue) []T 
 	}
 	return args
 }
+
+func MapValueToMap(ctx context.Context, values *basetypes.MapValue) map[string]string {
+	newMap := make(map[string]string, len(values.Elements()))
+	mapVals, _ := values.ToMapValue(ctx)
+	for key, val := range mapVals.Elements() {
+		tfVal, _ := val.ToTerraformValue(ctx)
+		var strVal string
+		tfVal.As(&strVal)
+		newMap[key] = strVal
+	}
+	return newMap
+}

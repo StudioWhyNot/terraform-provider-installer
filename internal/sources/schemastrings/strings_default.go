@@ -5,3 +5,5 @@ const DefaultIdDescription = "The unique identifier for the resource. This is us
 const DefaultSudoDescription = "Whether to run the program as a sudo user."
 
 const DefaultConnectionNameDescription = "The user and host this resource is connected to."
+
+const DefaultEnvironmentDescription = "The environment to execute the cammand with."

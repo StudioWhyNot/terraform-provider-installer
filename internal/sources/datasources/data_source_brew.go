@@ -29,6 +29,7 @@ type DataSourceBrewModel struct {
 	Version                              types.String `tfsdk:"version"`
 	Path                                 types.String `tfsdk:"path"`
 	Sudo                                 types.Bool   `tfsdk:"sudo"`
+	Environment                          types.Map    `tfsdk:"environment"`
 	Cask                                 types.Bool   `tfsdk:"cask"`
 	*terraformutils.RemoteConnectionInfo `tfsdk:"remote_connection"`
 }
@@ -37,8 +38,8 @@ func (m *DataSourceBrewModel) GetSudo() bool {
 	return m.Sudo.ValueBool()
 }
 
-func (m *DataSourceBrewModel) GetEnvironment() map[string]string {
-	return nil
+func (m *DataSourceBrewModel) GetEnvironment(ctx context.Context) map[string]string {
+	return sources.MapValueToMap(ctx, &m.Environment)
 }
 
 func (m *DataSourceBrewModel) GetNamedVersion() models.NamedVersion {
@@ -93,11 +94,12 @@ func NewDataSourceBrew() datasource.DataSource {
 func (d *DataSourceBrew) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"name":    defaults.GetNameSchema(schemastrings.BrewNameDescription),
-			"version": defaults.GetVersionSchema(schemastrings.BrewVersionDescription),
-			"path":    defaults.GetPathSchema(schemastrings.BrewPathDescription),
-			"sudo":    defaults.GetSudoSchema(),
-			"cask":    defaults.GetCaskSchema(),
+			"name":        defaults.GetNameSchema(schemastrings.BrewNameDescription),
+			"version":     defaults.GetVersionSchema(schemastrings.BrewVersionDescription),
+			"path":        defaults.GetPathSchema(schemastrings.BrewPathDescription),
+			"sudo":        defaults.GetSudoSchema(),
+			"environment": defaults.GetEnvironmentSchema(),
+			"cask":        defaults.GetCaskSchema(),
 		},
 		Blocks: map[string]schema.Block{
 			"remote_connection": providerdefaults.GetRemoteConnectionBlockSchema(),

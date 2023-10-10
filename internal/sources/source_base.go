@@ -54,8 +54,8 @@ func (s *SourceBase[T]) TryDisconnect() error {
 	return s.Communicator.Disconnect()
 }
 
-func GetIDFromName(name types.String, installerType enums.InstallerType) types.String {
-	return types.StringValue(installerType.GetIDFromName(name.ValueString()))
+func GetIDFromName(name string, installerType enums.InstallerType) types.String {
+	return types.StringValue(installerType.GetIDFromName(name))
 }
 
 func GetIDFromNameAndVersion(seperator string, name types.String, version types.String, installerType enums.InstallerType) types.String {

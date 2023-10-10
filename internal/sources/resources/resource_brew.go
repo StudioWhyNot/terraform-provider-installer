@@ -31,6 +31,7 @@ type ResourceBrewModel struct {
 	Version                              types.String `tfsdk:"version"`
 	Path                                 types.String `tfsdk:"path"`
 	Sudo                                 types.Bool   `tfsdk:"sudo"`
+	Environment                          types.Map    `tfsdk:"environment"`
 	Cask                                 types.Bool   `tfsdk:"sudo"`
 	*terraformutils.RemoteConnectionInfo `tfsdk:"remote_connection"`
 }
@@ -39,8 +40,8 @@ func (m *ResourceBrewModel) GetSudo() bool {
 	return m.Sudo.ValueBool()
 }
 
-func (m *ResourceBrewModel) GetEnvironment() map[string]string {
-	return nil
+func (m *ResourceBrewModel) GetEnvironment(ctx context.Context) map[string]string {
+	return sources.MapValueToMap(ctx, &m.Environment)
 }
 
 func (m *ResourceBrewModel) GetNamedVersion() models.NamedVersion {
@@ -98,12 +99,13 @@ func (r *ResourceBrew) Schema(ctx context.Context, req resource.SchemaRequest, r
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: schemastrings.BrewSourceDescription,
 		Attributes: map[string]schema.Attribute{
-			"id":      defaults.GetIdSchema(),
-			"name":    defaults.GetNameSchema(schemastrings.BrewNameDescription),
-			"version": defaults.GetVersionSchema(schemastrings.BrewVersionDescription),
-			"path":    defaults.GetPathSchema(schemastrings.BrewPathDescription),
-			"sudo":    defaults.GetSudoSchema(brew.DefaultSudo),
-			"cask":    defaults.GetCaskSchema(schemastrings.BrewCaskDescription, brew.DefaultCask),
+			"id":          defaults.GetIdSchema(),
+			"name":        defaults.GetNameSchema(schemastrings.BrewNameDescription),
+			"version":     defaults.GetVersionSchema(schemastrings.BrewVersionDescription),
+			"path":        defaults.GetPathSchema(schemastrings.BrewPathDescription),
+			"sudo":        defaults.GetSudoSchema(brew.DefaultSudo),
+			"environment": defaults.GetEnvironmentSchema(),
+			"cask":        defaults.GetCaskSchema(schemastrings.BrewCaskDescription, brew.DefaultCask),
 		},
 		Blocks: map[string]schema.Block{
 			"remote_connection": defaults.GetRemoteConnectionBlockSchema(),

@@ -29,6 +29,7 @@ type DataSourceAptModel struct {
 	Version                              types.String `tfsdk:"version"`
 	Path                                 types.String `tfsdk:"path"`
 	Sudo                                 types.Bool   `tfsdk:"sudo"`
+	Environment                          types.Map    `tfsdk:"environment"`
 	*terraformutils.RemoteConnectionInfo `tfsdk:"remote_connection"`
 }
 
@@ -36,8 +37,8 @@ func (m *DataSourceAptModel) GetSudo() bool {
 	return m.Sudo.ValueBool()
 }
 
-func (m *DataSourceAptModel) GetEnvironment() map[string]string {
-	return nil
+func (m *DataSourceAptModel) GetEnvironment(ctx context.Context) map[string]string {
+	return sources.MapValueToMap(ctx, &m.Environment)
 }
 
 func (m *DataSourceAptModel) GetNamedVersion() models.NamedVersion {
@@ -88,10 +89,11 @@ func NewDataSourceApt() datasource.DataSource {
 func (d *DataSourceApt) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"name":    defaults.GetNameSchema(schemastrings.AptNameDescription),
-			"version": defaults.GetVersionSchema(schemastrings.AptVersionDescription),
-			"path":    defaults.GetPathSchema(schemastrings.AptPathDescription),
-			"sudo":    defaults.GetSudoSchema(),
+			"name":        defaults.GetNameSchema(schemastrings.AptNameDescription),
+			"version":     defaults.GetVersionSchema(schemastrings.AptVersionDescription),
+			"path":        defaults.GetPathSchema(schemastrings.AptPathDescription),
+			"sudo":        defaults.GetSudoSchema(),
+			"environment": defaults.GetEnvironmentSchema(),
 		},
 		Blocks: map[string]schema.Block{
 			"remote_connection": providerdefaults.GetRemoteConnectionBlockSchema(),

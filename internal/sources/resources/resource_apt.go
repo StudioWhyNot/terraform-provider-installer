@@ -31,6 +31,7 @@ type ResourceAptModel struct {
 	Version                              types.String `tfsdk:"version"`
 	Path                                 types.String `tfsdk:"path"`
 	Sudo                                 types.Bool   `tfsdk:"sudo"`
+	Environment                          types.Map    `tfsdk:"environment"`
 	*terraformutils.RemoteConnectionInfo `tfsdk:"remote_connection"`
 }
 
@@ -38,8 +39,8 @@ func (m *ResourceAptModel) GetSudo() bool {
 	return m.Sudo.ValueBool()
 }
 
-func (m *ResourceAptModel) GetEnvironment() map[string]string {
-	return nil
+func (m *ResourceAptModel) GetEnvironment(ctx context.Context) map[string]string {
+	return sources.MapValueToMap(ctx, &m.Environment)
 }
 
 func (m *ResourceAptModel) GetNamedVersion() models.NamedVersion {
@@ -93,11 +94,12 @@ func (r *ResourceApt) Schema(ctx context.Context, req resource.SchemaRequest, re
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: schemastrings.AptSourceDescription,
 		Attributes: map[string]schema.Attribute{
-			"id":      defaults.GetIdSchema(),
-			"name":    defaults.GetNameSchema(schemastrings.AptNameDescription),
-			"version": defaults.GetVersionSchema(schemastrings.AptVersionDescription),
-			"path":    defaults.GetPathSchema(schemastrings.AptPathDescription),
-			"sudo":    defaults.GetSudoSchema(apt.DefaultSudo),
+			"id":          defaults.GetIdSchema(),
+			"name":        defaults.GetNameSchema(schemastrings.AptNameDescription),
+			"version":     defaults.GetVersionSchema(schemastrings.AptVersionDescription),
+			"path":        defaults.GetPathSchema(schemastrings.AptPathDescription),
+			"sudo":        defaults.GetSudoSchema(apt.DefaultSudo),
+			"environment": defaults.GetEnvironmentSchema(),
 		},
 		Blocks: map[string]schema.Block{
 			"remote_connection": defaults.GetRemoteConnectionBlockSchema(),

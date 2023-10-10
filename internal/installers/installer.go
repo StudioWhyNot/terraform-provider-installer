@@ -10,7 +10,7 @@ import (
 
 type InstallerOptions interface {
 	GetSudo() bool
-	GetEnvironment() map[string]string
+	GetEnvironment(ctx context.Context) map[string]string
 }
 
 // The basic interface for all installers.

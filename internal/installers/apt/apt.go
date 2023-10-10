@@ -47,7 +47,7 @@ func (i *AptInstaller[T]) GetInstallerType() enums.InstallerType {
 }
 
 func (i *AptInstaller[T]) Install(ctx context.Context, options T) error {
-	wrapper := i.GetCliWrapper(options)
+	wrapper := i.GetCliWrapper(ctx, options)
 	out := aptInstall(ctx, wrapper, options.GetName(), options.GetVersion())
 	return out.Error
 }
@@ -62,13 +62,13 @@ func (i *AptInstaller[T]) Uninstall(ctx context.Context, options T) (bool, error
 		// Not installed, no error.
 		return false, nil
 	}
-	wrapper := i.GetCliWrapper(options)
+	wrapper := i.GetCliWrapper(ctx, options)
 	out := aptRemove(ctx, wrapper, options.GetName(), options.GetVersion())
 	return out.Error == nil, out.Error
 }
 
-func (i *AptInstaller[T]) GetCliWrapper(options T) cliwrapper.CliWrapper {
-	environment := system.MergeMaps(DefaultEnvironment, options.GetEnvironment())
+func (i *AptInstaller[T]) GetCliWrapper(ctx context.Context, options T) cliwrapper.CliWrapper {
+	environment := system.MergeMaps(DefaultEnvironment, options.GetEnvironment(ctx))
 	return cliwrapper.New(i, options.GetSudo(), environment, DefaultProgram)
 }
 

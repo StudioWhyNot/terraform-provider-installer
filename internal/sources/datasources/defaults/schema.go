@@ -2,6 +2,7 @@ package defaults
 
 import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/schemastrings"
 )
 
@@ -50,4 +51,12 @@ func GetConnectionNameSchema() schema.StringAttribute {
 	schma.Required = false
 	schma.Computed = true
 	return schma
+}
+
+func GetEnvironmentSchema() schema.MapAttribute {
+	return schema.MapAttribute{
+		ElementType:         types.StringType,
+		MarkdownDescription: schemastrings.DefaultEnvironmentDescription,
+		Optional:            true,
+	}
 }

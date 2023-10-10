@@ -5,6 +5,8 @@ package resources
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -27,12 +29,14 @@ var _ sources.SourceData = &ResourceScriptModel{}
 type ResourceScriptModel struct {
 	Id                                   types.String `tfsdk:"id"`
 	Path                                 types.String `tfsdk:"path"`
+	Script                               types.String `tfsdk:"script"`
 	InstallScript                        types.String `tfsdk:"install_script"`
 	FindInstalledScript                  types.String `tfsdk:"find_installed_script"`
 	UninstallScript                      types.String `tfsdk:"uninstall_script"`
 	DefaultArgs                          types.List   `tfsdk:"default_args"`
 	AdditionalArgs                       types.List   `tfsdk:"additional_args"`
 	Sudo                                 types.Bool   `tfsdk:"sudo"`
+	Environment                          types.Map    `tfsdk:"environment"`
 	Shell                                types.String `tfsdk:"shell"`
 	*terraformutils.RemoteConnectionInfo `tfsdk:"remote_connection"`
 }
@@ -43,6 +47,10 @@ func (m *ResourceScriptModel) GetId() string {
 
 func (m *ResourceScriptModel) GetPath() string {
 	return m.Path.ValueString()
+}
+
+func (m *ResourceScriptModel) GetScript() string {
+	return m.Script.ValueString()
 }
 
 func (m *ResourceScriptModel) GetInstallScript() string {
@@ -69,8 +77,8 @@ func (m *ResourceScriptModel) GetSudo() bool {
 	return m.Sudo.ValueBool()
 }
 
-func (m *ResourceScriptModel) GetEnvironment() map[string]string {
-	return nil
+func (m *ResourceScriptModel) GetEnvironment(ctx context.Context) map[string]string {
+	return sources.MapValueToMap(ctx, &m.Environment)
 }
 
 func (m *ResourceScriptModel) GetShell() string {
@@ -78,12 +86,12 @@ func (m *ResourceScriptModel) GetShell() string {
 }
 
 func (m *ResourceScriptModel) Initialize() bool {
-	idString := m.Path
-	if m.Path.IsNull() {
-		idString = m.FindInstalledScript
-	}
-	m.Id = sources.GetIDFromName(idString, enums.InstallerScript)
-	return !idString.IsNull()
+	scriptString := m.GetPath() + m.GetInstallScript() + m.GetFindInstalledScript() + m.GetUninstallScript()
+	hash := sha256.Sum256([]byte(scriptString))
+	hashString := hex.EncodeToString(hash[:])
+
+	m.Id = sources.GetIDFromName(hashString, enums.InstallerScript)
+	return !m.Id.IsNull()
 }
 
 func (m *ResourceScriptModel) GetRemoteConnectionInfo() *terraformutils.RemoteConnectionInfo {
@@ -116,12 +124,14 @@ func (r *ResourceScript) Schema(ctx context.Context, req resource.SchemaRequest,
 		Attributes: map[string]schema.Attribute{
 			"id":                    defaults.GetIdSchema(),
 			"path":                  defaults.GetScriptPathSchema(schemastrings.ScriptPathDescription),
+			"script":                defaults.GetScriptSchema(schemastrings.ScriptScriptDescription),
 			"install_script":        defaults.GetInstallScriptSchema(schemastrings.ScriptInstallScriptDescription),
 			"find_installed_script": defaults.GetFindInstalledScriptSchema(schemastrings.ScriptFindInstalledScriptDescription),
 			"uninstall_script":      defaults.GetUninstallScriptSchema(schemastrings.ScriptUninstallScriptDescription),
 			"additional_args":       defaults.GetAdditionalArgsSchema(schemastrings.ScriptAdditionalArgsDescription),
 			"default_args":          defaults.GetDefaultArgsSchema(schemastrings.ScriptDefaultArgsDescription, script.DefaultArg),
 			"sudo":                  defaults.GetSudoSchema(script.DefaultSudo),
+			"environment":           defaults.GetEnvironmentSchema(),
 			"shell":                 defaults.GetShellSchema(schemastrings.ScriptShellDescription, script.DefaultProgram),
 		},
 		Blocks: map[string]schema.Block{

@@ -19,6 +19,7 @@ type ScriptInstallerOptions interface {
 	GetId() string
 	GetPath() string
 	GetShell() string
+	GetScript() string
 	GetInstallScript() string
 	GetFindInstalledScript() string
 	GetUninstallScript() string
@@ -37,6 +38,40 @@ const DefaultProgram = "sh"
 const DefaultArg = "-c"
 const VersionSeperator = "="
 
+const InstallArg = "install"
+const FindInstalledArg = "find"
+const UninstallArg = "uninstall"
+
+type installerAction int
+
+const (
+	install installerAction = iota
+	find_installed
+	uninstall
+)
+
+func GetScriptFromAction(action installerAction, options ScriptInstallerOptions) (string, string, bool) {
+	var script string
+	var actionArg string
+	var isDefault bool
+	switch action {
+	case install:
+		script = options.GetInstallScript()
+		actionArg = InstallArg
+	case find_installed:
+		script = options.GetFindInstalledScript()
+		actionArg = FindInstalledArg
+	case uninstall:
+		script = options.GetUninstallScript()
+		actionArg = UninstallArg
+	}
+	if script == "" {
+		script = options.GetScript()
+		isDefault = script != ""
+	}
+	return script, actionArg, isDefault
+}
+
 func NewScriptInstaller[T ScriptInstallerOptions](config installers.InstallerConfig) *ScriptInstaller[T] {
 	return &ScriptInstaller[T]{
 		InstallerConfig: config,
@@ -48,7 +83,8 @@ func (i *ScriptInstaller[T]) GetInstallerType() enums.InstallerType {
 }
 
 func (i *ScriptInstaller[T]) Install(ctx context.Context, options T) error {
-	out := i.executeScript(ctx, options, options.GetInstallScript())
+	script, action, isDefault := GetScriptFromAction(install, options)
+	out := i.executeScript(ctx, options, script, action, isDefault)
 	return out.Error
 }
 
@@ -66,11 +102,11 @@ func (i *ScriptInstaller[T]) FindInstalled(ctx context.Context, options T) (*mod
 		}
 	}
 	// Otherwise, if a find installed script is specified, run the script to find the program.
-	findInstalledScript := options.GetFindInstalledScript()
+	findInstalledScript, action, isDefault := GetScriptFromAction(find_installed, options)
 	if findInstalledScript == "" {
 		return nil, nil
 	}
-	out := i.executeScript(ctx, options, findInstalledScript)
+	out := i.executeScript(ctx, options, findInstalledScript, action, isDefault)
 
 	jsonData := out.CombinedOutput
 
@@ -92,21 +128,26 @@ func (i *ScriptInstaller[T]) Uninstall(ctx context.Context, options T) (bool, er
 		// Not installed, no error.
 		return false, nil
 	}
-	out := i.executeScript(ctx, options, options.GetUninstallScript())
+	script, action, isDefault := GetScriptFromAction(uninstall, options)
+	out := i.executeScript(ctx, options, script, action, isDefault)
 	return out.Error == nil, out.Error
 }
 
-func (i *ScriptInstaller[T]) executeScript(ctx context.Context, options T, script string) clioutput.CliOutput {
+func (i *ScriptInstaller[T]) executeScript(ctx context.Context, options T, script string, action string, isDefault bool) clioutput.CliOutput {
 	// Use single quote to wrap the script to avoid shell expansion.
 	const wrapperCharacter = "'"
-	wrapper := i.GetCliWrapper(options)
+	wrapper := i.GetCliWrapper(ctx, options)
 	args := append(options.GetDefaultArgs(ctx), system.WrapString(script, wrapperCharacter))
+	if !isDefault {
+		// If we are using the fallback script, pass in the argument for the action.
+		args = append(args, action)
+	}
 	args = append(args, options.GetAdditionalArgs(ctx)...)
 	return wrapper.ExecuteCommand(ctx, args...)
 }
 
-func (i *ScriptInstaller[T]) GetCliWrapper(options T) cliwrapper.CliWrapper {
-	return cliwrapper.New(i, options.GetSudo(), options.GetEnvironment(), options.GetShell())
+func (i *ScriptInstaller[T]) GetCliWrapper(ctx context.Context, options T) cliwrapper.CliWrapper {
+	return cliwrapper.New(i, options.GetSudo(), options.GetEnvironment(ctx), options.GetShell())
 }
 
 func IsInstalled(path string) (bool, error) {

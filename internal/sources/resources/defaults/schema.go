@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -18,6 +19,17 @@ import (
 	"github.com/shihanng/terraform-provider-installer/internal/terraform/configs/configschema"
 	"github.com/shihanng/terraform-provider-installer/internal/terraformutils"
 )
+
+func getDefaultStringListSchema(markdownDescription string, optional bool) schema.ListAttribute {
+	return schema.ListAttribute{
+		ElementType:         types.StringType,
+		MarkdownDescription: markdownDescription,
+		Optional:            optional,
+		PlanModifiers: []planmodifier.List{
+			listplanmodifier.RequiresReplace(),
+		},
+	}
+}
 
 func getDefaultStringSchema(markdownDescription string, optional bool, requiresReplace bool) schema.StringAttribute {
 	schma := schema.StringAttribute{
@@ -101,12 +113,21 @@ func GetUninstallScriptSchema(markdownDescription string) schema.StringAttribute
 	return getDefaultStringSchema(markdownDescription, false, true)
 }
 
+func GetScriptSchema(markdownDescription string) schema.StringAttribute {
+	return getDefaultStringSchema(markdownDescription, false, true)
+}
+
 func GetAdditionalArgsSchema(markdownDescription string) schema.ListAttribute {
-	return schema.ListAttribute{
-		ElementType: types.StringType,
-		Optional:    true,
-		PlanModifiers: []planmodifier.List{
-			listplanmodifier.RequiresReplace(),
+	return getDefaultStringListSchema(markdownDescription, true)
+}
+
+func GetEnvironmentSchema() schema.MapAttribute {
+	return schema.MapAttribute{
+		ElementType:         types.StringType,
+		MarkdownDescription: schemastrings.DefaultEnvironmentDescription,
+		Optional:            true,
+		PlanModifiers: []planmodifier.Map{
+			mapplanmodifier.RequiresReplace(),
 		},
 	}
 }
