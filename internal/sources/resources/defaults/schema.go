@@ -102,7 +102,7 @@ func GetCaskSchema(markdownDescription string, defaultVal bool) schema.BoolAttri
 }
 
 func GetInstallScriptSchema(markdownDescription string) schema.StringAttribute {
-	return getDefaultStringSchema(markdownDescription, false, true)
+	return getDefaultStringSchema(markdownDescription, true, true)
 }
 
 func GetFindInstalledScriptSchema(markdownDescription string) schema.StringAttribute {
@@ -110,11 +110,11 @@ func GetFindInstalledScriptSchema(markdownDescription string) schema.StringAttri
 }
 
 func GetUninstallScriptSchema(markdownDescription string) schema.StringAttribute {
-	return getDefaultStringSchema(markdownDescription, false, true)
+	return getDefaultStringSchema(markdownDescription, true, true)
 }
 
 func GetScriptSchema(markdownDescription string) schema.StringAttribute {
-	return getDefaultStringSchema(markdownDescription, false, true)
+	return getDefaultStringSchema(markdownDescription, true, true)
 }
 
 func GetAdditionalArgsSchema(markdownDescription string) schema.ListAttribute {

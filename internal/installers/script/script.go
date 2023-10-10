@@ -123,12 +123,11 @@ func (i *ScriptInstaller[T]) FindInstalled(ctx context.Context, options T) (*mod
 }
 
 func (i *ScriptInstaller[T]) Uninstall(ctx context.Context, options T) (bool, error) {
-	info, _ := i.FindInstalled(ctx, options)
-	if info == nil {
-		// Not installed, no error.
+	// Always run the uninstall script.
+	script, action, isDefault := GetScriptFromAction(uninstall, options)
+	if script == "" {
 		return false, nil
 	}
-	script, action, isDefault := GetScriptFromAction(uninstall, options)
 	out := i.executeScript(ctx, options, script, action, isDefault)
 	return out.Error == nil, out.Error
 }
@@ -138,7 +137,7 @@ func (i *ScriptInstaller[T]) executeScript(ctx context.Context, options T, scrip
 	const wrapperCharacter = "'"
 	wrapper := i.GetCliWrapper(ctx, options)
 	args := append(options.GetDefaultArgs(ctx), system.WrapString(script, wrapperCharacter))
-	if !isDefault {
+	if isDefault {
 		// If we are using the fallback script, pass in the argument for the action.
 		args = append(args, action)
 	}
