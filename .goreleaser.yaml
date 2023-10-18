@@ -20,7 +20,7 @@ builds:
       # - darwin
       # - freebsd
       - linux
-      #- windows
+      - windows
     goarch:
       - amd64
       # - "386"
