@@ -132,6 +132,12 @@ func GetEnvironmentSchema() schema.MapAttribute {
 	}
 }
 
+func GetSecretsSchema() schema.MapAttribute {
+	schema := GetEnvironmentSchema()
+	schema.Sensitive = true
+	return schema
+}
+
 func GetDefaultArgsSchema(markdownDescription string, defaultArg string) schema.ListAttribute {
 	args, _ := types.ListValue(types.StringType, []attr.Value{types.StringValue(defaultArg)})
 	return schema.ListAttribute{

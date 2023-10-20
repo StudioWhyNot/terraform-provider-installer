@@ -16,6 +16,7 @@ import (
 	"github.com/shihanng/terraform-provider-installer/internal/sources"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/datasources/defaults"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/schemastrings"
+	"github.com/shihanng/terraform-provider-installer/internal/system"
 	"github.com/shihanng/terraform-provider-installer/internal/terraformutils"
 )
 
@@ -30,6 +31,7 @@ type DataSourceBrewModel struct {
 	Path                                 types.String `tfsdk:"path"`
 	Sudo                                 types.Bool   `tfsdk:"sudo"`
 	Environment                          types.Map    `tfsdk:"environment"`
+	Secrets                              types.Map    `tfsdk:"secrets"`
 	Cask                                 types.Bool   `tfsdk:"cask"`
 	*terraformutils.RemoteConnectionInfo `tfsdk:"remote_connection"`
 }
@@ -38,8 +40,8 @@ func (m *DataSourceBrewModel) GetSudo() bool {
 	return m.Sudo.ValueBool()
 }
 
-func (m *DataSourceBrewModel) GetEnvironment(ctx context.Context) map[string]string {
-	return sources.MapValueToMap(ctx, &m.Environment)
+func (m *DataSourceBrewModel) GetEnvironmentAndSecrets(ctx context.Context) map[string]string {
+	return system.MergeMaps(sources.MapValueToMap(ctx, &m.Environment), sources.MapValueToMap(ctx, &m.Secrets))
 }
 
 func (m *DataSourceBrewModel) GetNamedVersion() models.NamedVersion {
@@ -99,6 +101,7 @@ func (d *DataSourceBrew) Schema(ctx context.Context, req datasource.SchemaReques
 			"path":        defaults.GetPathSchema(schemastrings.BrewPathDescription),
 			"sudo":        defaults.GetSudoSchema(),
 			"environment": defaults.GetEnvironmentSchema(),
+			"secrets":     defaults.GetSecretsSchema(),
 			"cask":        defaults.GetCaskSchema(),
 		},
 		Blocks: map[string]schema.Block{

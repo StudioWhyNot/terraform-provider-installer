@@ -68,7 +68,7 @@ func (i *AptInstaller[T]) Uninstall(ctx context.Context, options T) (bool, error
 }
 
 func (i *AptInstaller[T]) GetCliWrapper(ctx context.Context, options T) cliwrapper.CliWrapper {
-	environment := system.MergeMaps(DefaultEnvironment, options.GetEnvironment(ctx))
+	environment := system.MergeMaps(DefaultEnvironment, options.GetEnvironmentAndSecrets(ctx))
 	return cliwrapper.New(i, options.GetSudo(), environment, DefaultProgram)
 }
 

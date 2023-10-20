@@ -60,3 +60,9 @@ func GetEnvironmentSchema() schema.MapAttribute {
 		Optional:            true,
 	}
 }
+
+func GetSecretsSchema() schema.MapAttribute {
+	schema := GetEnvironmentSchema()
+	schema.Sensitive = true
+	return schema
+}

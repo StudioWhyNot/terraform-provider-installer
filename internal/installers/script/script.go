@@ -146,7 +146,7 @@ func (i *ScriptInstaller[T]) executeScript(ctx context.Context, options T, scrip
 }
 
 func (i *ScriptInstaller[T]) GetCliWrapper(ctx context.Context, options T) cliwrapper.CliWrapper {
-	return cliwrapper.New(i, options.GetSudo(), options.GetEnvironment(ctx), options.GetShell())
+	return cliwrapper.New(i, options.GetSudo(), options.GetEnvironmentAndSecrets(ctx), options.GetShell())
 }
 
 func IsInstalled(path string) (bool, error) {

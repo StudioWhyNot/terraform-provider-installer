@@ -74,7 +74,7 @@ func (i *BrewInstaller[T]) getBrewCommand(options T, command string, withJSONV2 
 }
 
 func (i *BrewInstaller[T]) GetCliWrapper(ctx context.Context, options T) cliwrapper.CliWrapper {
-	return cliwrapper.New(i, options.GetSudo(), options.GetEnvironment(ctx), DefaultProgram)
+	return cliwrapper.New(i, options.GetSudo(), options.GetEnvironmentAndSecrets(ctx), DefaultProgram)
 }
 
 type brewOptions int

@@ -16,6 +16,7 @@ import (
 	"github.com/shihanng/terraform-provider-installer/internal/sources"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/resources/defaults"
 	"github.com/shihanng/terraform-provider-installer/internal/sources/schemastrings"
+	"github.com/shihanng/terraform-provider-installer/internal/system"
 	"github.com/shihanng/terraform-provider-installer/internal/terraformutils"
 )
 
@@ -32,6 +33,7 @@ type ResourceAptModel struct {
 	Path                                 types.String `tfsdk:"path"`
 	Sudo                                 types.Bool   `tfsdk:"sudo"`
 	Environment                          types.Map    `tfsdk:"environment"`
+	Secrets                              types.Map    `tfsdk:"secrets"`
 	*terraformutils.RemoteConnectionInfo `tfsdk:"remote_connection"`
 }
 
@@ -39,8 +41,8 @@ func (m *ResourceAptModel) GetSudo() bool {
 	return m.Sudo.ValueBool()
 }
 
-func (m *ResourceAptModel) GetEnvironment(ctx context.Context) map[string]string {
-	return sources.MapValueToMap(ctx, &m.Environment)
+func (m *ResourceAptModel) GetEnvironmentAndSecrets(ctx context.Context) map[string]string {
+	return system.MergeMaps(sources.MapValueToMap(ctx, &m.Environment), sources.MapValueToMap(ctx, &m.Secrets))
 }
 
 func (m *ResourceAptModel) GetNamedVersion() models.NamedVersion {
@@ -100,6 +102,7 @@ func (r *ResourceApt) Schema(ctx context.Context, req resource.SchemaRequest, re
 			"path":        defaults.GetPathSchema(schemastrings.AptPathDescription),
 			"sudo":        defaults.GetSudoSchema(apt.DefaultSudo),
 			"environment": defaults.GetEnvironmentSchema(),
+			"secrets":     defaults.GetSecretsSchema(),
 		},
 		Blocks: map[string]schema.Block{
 			"remote_connection": defaults.GetRemoteConnectionBlockSchema(),
