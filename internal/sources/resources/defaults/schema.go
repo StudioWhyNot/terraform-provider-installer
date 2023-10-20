@@ -135,6 +135,7 @@ func GetEnvironmentSchema() schema.MapAttribute {
 func GetSecretsSchema() schema.MapAttribute {
 	schema := GetEnvironmentSchema()
 	schema.Sensitive = true
+	schema.MarkdownDescription = schemastrings.DefaultSecretsDescription
 	return schema
 }
 

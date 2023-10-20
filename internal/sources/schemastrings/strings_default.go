@@ -6,4 +6,6 @@ const DefaultSudoDescription = "Whether to run the program as a sudo user."
 
 const DefaultConnectionNameDescription = "The user and host this resource is connected to."
 
-const DefaultEnvironmentDescription = "The environment to execute the cammand with."
+const DefaultEnvironmentDescription = "The environment to execute the command with."
+
+const DefaultSecretsDescription = "The senstive environment to execute the command with."
