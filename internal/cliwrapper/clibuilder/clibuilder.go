@@ -35,7 +35,12 @@ func (c *CliBuilder) GetProgramAndParams(params ...string) (string, []string) {
 func (c *CliBuilder) GetProgramAndParamsWithEnvironment(params ...string) []string {
 	program, params := c.GetProgramAndParams(params...)
 	envList := c.EnvironmentList()
-	envList = append([]string{program}, envList...)
+	if c.Sudo {
+		envList = append([]string{program}, envList...)
+	} else {
+		envList = append(envList, program)
+	}
+
 	return append(envList, params...)
 }
 
