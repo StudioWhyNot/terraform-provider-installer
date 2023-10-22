@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"os/exec"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/shihanng/terraform-provider-installer/internal/cliwrapper"
@@ -136,6 +137,8 @@ func (i *ScriptInstaller[T]) executeScript(ctx context.Context, options T, scrip
 	// Use single quote to wrap the script to avoid shell expansion.
 	const wrapperCharacter = "'"
 	wrapper := i.GetCliWrapper(ctx, options)
+	// Escape single quote characters.
+	script = strings.ReplaceAll(script, wrapperCharacter, wrapperCharacter+"\\"+wrapperCharacter+wrapperCharacter)
 	args := append(options.GetDefaultArgs(ctx), system.WrapString(script, wrapperCharacter))
 	if isDefault {
 		// If we are using the fallback script, pass in the argument for the action.
