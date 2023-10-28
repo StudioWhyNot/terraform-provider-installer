@@ -60,10 +60,11 @@ func EnvMapToEnvList(env map[string]string) []string {
 	if env == nil {
 		return []string{}
 	}
-	// Use quotes to allow for spaces and shell expansion.
-	const envWrapperCharacter = "\""
+	// Use single quotes to prevent shell expansion. Use envsubst to expand variables.
+	const envWrapperCharacter = "'"
 	envList := make([]string, 0, len(env))
 	for k, v := range env {
+		v = strings.ReplaceAll(v, envWrapperCharacter, envWrapperCharacter+"\\"+envWrapperCharacter+envWrapperCharacter)
 		envList = append(envList, k+EnvSeperator+system.WrapString(v, envWrapperCharacter))
 	}
 	return envList
