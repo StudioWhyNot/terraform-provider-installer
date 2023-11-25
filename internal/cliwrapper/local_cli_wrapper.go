@@ -24,6 +24,10 @@ func NewLocalCliWrapper(sudo bool, environment map[string]string, programName st
 	}
 }
 
+func (c LocalCliWrapper) EscapeScript(script string) string {
+	return script
+}
+
 // ExecuteCommand executes a command with the given parameters, taking into consideration whether or not it should be sudo.
 func (c LocalCliWrapper) ExecuteCommand(ctx context.Context, params ...string) clioutput.CliOutput {
 	programName, params := c.GetProgramAndParams(params...)

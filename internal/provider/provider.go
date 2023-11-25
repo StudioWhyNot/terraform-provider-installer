@@ -68,6 +68,7 @@ func (p *InstallerProvider) Resources(ctx context.Context) []func() resource.Res
 func (p *InstallerProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		datasources.NewDataSourceApt,
+		datasources.NewDataSourceScript,
 	}
 }
 

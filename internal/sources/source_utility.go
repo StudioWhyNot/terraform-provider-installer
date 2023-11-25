@@ -95,6 +95,9 @@ func DefaultRead[T SourceData](source *SourceBase[T], state *tfsdk.State, ctx co
 	}
 
 	FillAndSetStateData(source, ctx, state, diagnostics, data)
+	// Save updated data into Terraform state
+	diags := state.Set(ctx, &data)
+	diagnostics.Append(diags...)
 	return true
 }
 

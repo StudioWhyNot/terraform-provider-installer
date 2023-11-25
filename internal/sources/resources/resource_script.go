@@ -40,6 +40,7 @@ type ResourceScriptModel struct {
 	Environment                          types.Map    `tfsdk:"environment"`
 	Shell                                types.String `tfsdk:"shell"`
 	Secrets                              types.Map    `tfsdk:"secrets"`
+	Output                               types.String `tfsdk:"output"`
 	*terraformutils.RemoteConnectionInfo `tfsdk:"remote_connection"`
 }
 
@@ -85,6 +86,10 @@ func (m *ResourceScriptModel) GetEnvironmentAndSecrets(ctx context.Context) map[
 
 func (m *ResourceScriptModel) GetShell() string {
 	return m.Shell.ValueString()
+}
+
+func (m *ResourceScriptModel) SetOutput(output string) {
+	m.Output = types.StringValue(output)
 }
 
 func (m *ResourceScriptModel) Initialize() bool {
@@ -136,6 +141,7 @@ func (r *ResourceScript) Schema(ctx context.Context, req resource.SchemaRequest,
 			"environment":           defaults.GetEnvironmentSchema(),
 			"secrets":               defaults.GetSecretsSchema(),
 			"shell":                 defaults.GetShellSchema(schemastrings.ScriptShellDescription, script.DefaultProgram),
+			"output":                defaults.GetOutputSchema(schemastrings.ScriptOutputDescription),
 		},
 		Blocks: map[string]schema.Block{
 			"remote_connection": defaults.GetRemoteConnectionBlockSchema(),

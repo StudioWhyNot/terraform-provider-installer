@@ -20,5 +20,7 @@ const ScriptDefaultArgsDescription = "Default prepended arguments to be passed t
 
 const ScriptShellDescription = "Which shell program to use to run the install, uninstall, and find_installed scripts. This shellis followed by the `-c` flag."
 
+const ScriptOutputDescription = "The output of executing the shell script."
+
 const ScriptScriptDescription = "Default script which will be usedif the install, uninstall, or find_installed scripts are not specified. " +
 	"What action is being performed is passed in as the first argument to the shell."

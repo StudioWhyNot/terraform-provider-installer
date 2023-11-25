@@ -8,6 +8,7 @@ import (
 
 type CliWrapper interface {
 	ExecuteCommand(ctx context.Context, params ...string) clioutput.CliOutput
+	EscapeScript(script string) string
 }
 
 func New(config CliWrapperConfig, sudo bool, environment map[string]string, programName string) CliWrapper {

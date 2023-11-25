@@ -184,3 +184,10 @@ func convertConfigSchemaBlockToSchemaBlock(config *configschema.Block) schema.Si
 	}
 	return block
 }
+
+func GetOutputSchema(markdownDescription string) schema.StringAttribute {
+	schma := getDefaultStringSchema(schemastrings.ScriptOutputDescription, false, false)
+	schma.Required = false
+	schma.Computed = true
+	return schma
+}

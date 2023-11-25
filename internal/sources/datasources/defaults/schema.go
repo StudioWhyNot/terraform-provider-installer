@@ -6,6 +6,14 @@ import (
 	"github.com/shihanng/terraform-provider-installer/internal/sources/schemastrings"
 )
 
+func getDefaultStringListSchema(markdownDescription string, optional bool) schema.ListAttribute {
+	return schema.ListAttribute{
+		ElementType:         types.StringType,
+		MarkdownDescription: markdownDescription,
+		Optional:            optional,
+	}
+}
+
 func getDefaultStringSchema(markdownDescription string, optional bool) schema.StringAttribute {
 	schma := schema.StringAttribute{
 		MarkdownDescription: markdownDescription,
@@ -53,6 +61,18 @@ func GetConnectionNameSchema() schema.StringAttribute {
 	return schma
 }
 
+func GetFindInstalledScriptSchema(markdownDescription string) schema.StringAttribute {
+	return getDefaultStringSchema(markdownDescription, true)
+}
+
+func GetScriptSchema(markdownDescription string) schema.StringAttribute {
+	return getDefaultStringSchema(markdownDescription, true)
+}
+
+func GetAdditionalArgsSchema(markdownDescription string) schema.ListAttribute {
+	return getDefaultStringListSchema(markdownDescription, true)
+}
+
 func GetEnvironmentSchema() schema.MapAttribute {
 	return schema.MapAttribute{
 		ElementType:         types.StringType,
@@ -66,4 +86,25 @@ func GetSecretsSchema() schema.MapAttribute {
 	schema.Sensitive = true
 	schema.MarkdownDescription = schemastrings.DefaultSecretsDescription
 	return schema
+}
+
+func GetDefaultArgsSchema(markdownDescription string) schema.ListAttribute {
+	return schema.ListAttribute{
+		ElementType: types.StringType,
+		Optional:    true,
+		Computed:    true,
+	}
+}
+
+func GetShellSchema(markdownDescription string) schema.StringAttribute {
+	schma := getDefaultStringSchema(markdownDescription, true)
+	schma.Computed = true
+	return schma
+}
+
+func GetOutputSchema(markdownDescription string) schema.StringAttribute {
+	schma := getDefaultStringSchema(schemastrings.ScriptOutputDescription, false)
+	schma.Required = false
+	schma.Computed = true
+	return schma
 }

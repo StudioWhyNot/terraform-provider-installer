@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"os/exec"
-	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/shihanng/terraform-provider-installer/internal/cliwrapper"
@@ -12,7 +11,6 @@ import (
 	"github.com/shihanng/terraform-provider-installer/internal/enums"
 	"github.com/shihanng/terraform-provider-installer/internal/installers"
 	"github.com/shihanng/terraform-provider-installer/internal/models"
-	"github.com/shihanng/terraform-provider-installer/internal/system"
 )
 
 type ScriptInstallerOptions interface {
@@ -26,6 +24,7 @@ type ScriptInstallerOptions interface {
 	GetUninstallScript() string
 	GetAdditionalArgs(ctx context.Context) []string
 	GetDefaultArgs(ctx context.Context) []string
+	SetOutput(output string)
 }
 
 var _ installers.Installer[ScriptInstallerOptions] = &ScriptInstaller[ScriptInstallerOptions]{}
@@ -110,6 +109,7 @@ func (i *ScriptInstaller[T]) FindInstalled(ctx context.Context, options T) (*mod
 	out := i.executeScript(ctx, options, findInstalledScript, action, isDefault)
 
 	jsonData := out.CombinedOutput
+	options.SetOutput(jsonData)
 
 	var info models.InstalledProgramInfo = models.InstalledProgramInfo{}
 	info.Seperator = VersionSeperator
@@ -134,12 +134,10 @@ func (i *ScriptInstaller[T]) Uninstall(ctx context.Context, options T) (bool, er
 }
 
 func (i *ScriptInstaller[T]) executeScript(ctx context.Context, options T, script string, action string, isDefault bool) clioutput.CliOutput {
-	// Use single quote to wrap the script to avoid shell expansion.
-	const wrapperCharacter = "'"
 	wrapper := i.GetCliWrapper(ctx, options)
-	// Escape single quote characters.
-	script = strings.ReplaceAll(script, wrapperCharacter, wrapperCharacter+"\\"+wrapperCharacter+wrapperCharacter)
-	args := append(options.GetDefaultArgs(ctx), system.WrapString(script, wrapperCharacter))
+	// Escape any characters, if needed.
+	script = wrapper.EscapeScript(script)
+	args := append(options.GetDefaultArgs(ctx), script)
 	if isDefault {
 		// If we are using the fallback script, pass in the argument for the action.
 		args = append(args, action)
