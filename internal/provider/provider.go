@@ -62,8 +62,6 @@ func (p *InstallerProvider) Resources(ctx context.Context) []func() resource.Res
 	return []func() resource.Resource{
 		resources.NewResourceApt,
 		resources.NewResourceScript,
-		//TODO: Brew
-		//TODO: Asdf
 	}
 }
 
