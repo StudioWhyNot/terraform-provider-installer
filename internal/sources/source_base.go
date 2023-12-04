@@ -14,7 +14,7 @@ import (
 )
 
 type SourceData interface {
-	Initialize() bool
+	Initialize(ctx context.Context) bool
 	CopyFromTypedInstalledProgramInfo(programInfo *models.TypedInstalledProgramInfo)
 	GetRemoteConnectionInfo() *terraformutils.RemoteConnectionInfo
 }

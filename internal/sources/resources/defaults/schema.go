@@ -121,6 +121,10 @@ func GetAdditionalArgsSchema(markdownDescription string) schema.ListAttribute {
 	return getDefaultStringListSchema(markdownDescription, true)
 }
 
+func GetIncludesSchema(markdownDescription string) schema.ListAttribute {
+	return getDefaultStringListSchema(markdownDescription, true)
+}
+
 func GetEnvironmentSchema() schema.MapAttribute {
 	return schema.MapAttribute{
 		ElementType:         types.StringType,

@@ -55,7 +55,7 @@ func (m *DataSourceAptModel) GetVersion() *version.Version {
 	return m.GetNamedVersion().Version
 }
 
-func (m *DataSourceAptModel) Initialize() bool {
+func (m *DataSourceAptModel) Initialize(ctx context.Context) bool {
 	return !m.Name.IsNull()
 }
 

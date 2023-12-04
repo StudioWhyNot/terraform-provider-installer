@@ -22,5 +22,7 @@ const ScriptShellDescription = "Which shell program to use to run the install, u
 
 const ScriptOutputDescription = "The output of executing the shell script."
 
+const ScriptIncludesDescription = "Additional scripts to be included in the executed script. Scripts are included in the order they are specified."
+
 const ScriptScriptDescription = "Default script which will be usedif the install, uninstall, or find_installed scripts are not specified. " +
 	"What action is being performed is passed in as the first argument to the shell."

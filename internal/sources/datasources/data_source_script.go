@@ -25,6 +25,7 @@ var _ sources.SourceData = &DataSourceScriptModel{}
 
 // DataSourceScriptModel describes the resource data model.
 type DataSourceScriptModel struct {
+	Includes                             types.List   `tfsdk:"includes"`
 	Script                               types.String `tfsdk:"script"`
 	FindInstalledScript                  types.String `tfsdk:"find_installed_script"`
 	DefaultArgs                          types.List   `tfsdk:"default_args"`
@@ -43,6 +44,10 @@ func (m *DataSourceScriptModel) GetId() string {
 
 func (m *DataSourceScriptModel) GetPath() string {
 	return ""
+}
+
+func (m *DataSourceScriptModel) GetIncludes(ctx context.Context) []string {
+	return sources.ListValueToList[string](ctx, &m.Includes)
 }
 
 func (m *DataSourceScriptModel) GetScript() string {
@@ -93,7 +98,7 @@ func (m *DataSourceScriptModel) SetOutput(output string) {
 	m.Output = types.StringValue(output)
 }
 
-func (m *DataSourceScriptModel) Initialize() bool {
+func (m *DataSourceScriptModel) Initialize(ctx context.Context) bool {
 	return !m.Script.IsNull()
 }
 
@@ -120,6 +125,7 @@ func (r *DataSourceScript) Schema(ctx context.Context, req datasource.SchemaRequ
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: schemastrings.ScriptSourceDescription,
 		Attributes: map[string]schema.Attribute{
+			"includes":              defaults.GetIncludesSchema(schemastrings.ScriptIncludesDescription),
 			"script":                defaults.GetScriptSchema(schemastrings.ScriptScriptDescription),
 			"find_installed_script": defaults.GetFindInstalledScriptSchema(schemastrings.ScriptFindInstalledScriptDescription),
 			"additional_args":       defaults.GetAdditionalArgsSchema(schemastrings.ScriptAdditionalArgsDescription),

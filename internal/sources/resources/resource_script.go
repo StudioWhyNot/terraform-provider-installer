@@ -30,6 +30,7 @@ var _ sources.SourceData = &ResourceScriptModel{}
 type ResourceScriptModel struct {
 	Id                                   types.String `tfsdk:"id"`
 	Path                                 types.String `tfsdk:"path"`
+	Includes                             types.List   `tfsdk:"includes"`
 	Script                               types.String `tfsdk:"script"`
 	InstallScript                        types.String `tfsdk:"install_script"`
 	FindInstalledScript                  types.String `tfsdk:"find_installed_script"`
@@ -50,6 +51,10 @@ func (m *ResourceScriptModel) GetId() string {
 
 func (m *ResourceScriptModel) GetPath() string {
 	return m.Path.ValueString()
+}
+
+func (m *ResourceScriptModel) GetIncludes(ctx context.Context) []string {
+	return sources.ListValueToList[string](ctx, &m.Includes)
 }
 
 func (m *ResourceScriptModel) GetScript() string {
@@ -92,8 +97,11 @@ func (m *ResourceScriptModel) SetOutput(output string) {
 	m.Output = types.StringValue(output)
 }
 
-func (m *ResourceScriptModel) Initialize() bool {
+func (m *ResourceScriptModel) Initialize(ctx context.Context) bool {
 	scriptString := m.GetPath() + m.GetInstallScript() + m.GetFindInstalledScript() + m.GetUninstallScript()
+	for _, include := range m.GetIncludes(ctx) {
+		scriptString += include
+	}
 	hash := sha256.Sum256([]byte(scriptString))
 	hashString := hex.EncodeToString(hash[:])
 
@@ -131,6 +139,7 @@ func (r *ResourceScript) Schema(ctx context.Context, req resource.SchemaRequest,
 		Attributes: map[string]schema.Attribute{
 			"id":                    defaults.GetIdSchema(),
 			"path":                  defaults.GetScriptPathSchema(schemastrings.ScriptPathDescription),
+			"includes":              defaults.GetIncludesSchema(schemastrings.ScriptIncludesDescription),
 			"script":                defaults.GetScriptSchema(schemastrings.ScriptScriptDescription),
 			"install_script":        defaults.GetInstallScriptSchema(schemastrings.ScriptInstallScriptDescription),
 			"find_installed_script": defaults.GetFindInstalledScriptSchema(schemastrings.ScriptFindInstalledScriptDescription),

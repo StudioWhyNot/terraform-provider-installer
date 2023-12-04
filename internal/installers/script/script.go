@@ -18,6 +18,7 @@ type ScriptInstallerOptions interface {
 	GetId() string
 	GetPath() string
 	GetShell() string
+	GetIncludes(ctx context.Context) []string
 	GetScript() string
 	GetInstallScript() string
 	GetFindInstalledScript() string
@@ -135,6 +136,10 @@ func (i *ScriptInstaller[T]) Uninstall(ctx context.Context, options T) (bool, er
 
 func (i *ScriptInstaller[T]) executeScript(ctx context.Context, options T, script string, action string, isDefault bool) clioutput.CliOutput {
 	wrapper := i.GetCliWrapper(ctx, options)
+	includes := options.GetIncludes(ctx)
+	for _, include := range includes {
+		script = include + "\n" + script
+	}
 	// Escape any characters, if needed.
 	script = wrapper.EscapeScript(script)
 	args := append(options.GetDefaultArgs(ctx), script)

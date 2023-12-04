@@ -57,7 +57,7 @@ func (m *ResourceAptModel) GetVersion() *version.Version {
 	return m.GetNamedVersion().Version
 }
 
-func (m *ResourceAptModel) Initialize() bool {
+func (m *ResourceAptModel) Initialize(ctx context.Context) bool {
 	m.Id = sources.GetIDFromNameAndVersion(apt.VersionSeperator, m.Name, m.Version, enums.InstallerApt)
 	return !m.Name.IsNull()
 }

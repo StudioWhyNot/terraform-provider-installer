@@ -20,7 +20,7 @@ func TryGetData[T any](ctx context.Context, provider TerraformDataProvider, diag
 
 func TryGetInitializedData[T SourceData](ctx context.Context, provider TerraformDataProvider, diagnostics *diag.Diagnostics) (T, bool) {
 	data, success := TryGetData[T](ctx, provider, diagnostics)
-	return data, success && data.Initialize()
+	return data, success && data.Initialize(ctx)
 }
 
 func SetStateData(ctx context.Context, state *tfsdk.State, diagnostics *diag.Diagnostics, val interface{}) {
